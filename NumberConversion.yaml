@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: Number_Conversion
+  description: |
+    convert the number into word
+servers:
+  - url: 'https://rakeshkumawat-eval-test.apigee.net'
+schemes:
+  - https
+paths:
+  /v1/numbertowords:
+    post:
+      description: >
+        Here We have to enter Number and backend server will convert it into
+        word 
+      parameters:
+        - name: post
+          required: true
+          description: Enter Number
+          in: body
+          schema:
+            title: NumberToWord
+            type: object
+            properties:
+              Number:
+                type: string
+            example:
+              Number: 23
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            title: Number
+            type: object
+            properties:
+              result:
+                type: string
+            example:
+              result: two dollars and thirty cents
