@@ -1,13 +1,7 @@
 # Automating the Dev Pipeline to Rapidly Design, Publish, and Consume APIs with Kong
 
-> This project assumes you are running in the [Kong Learning Lab
-environment](https://education.konghq.com/courses/course-v1:kong+KGLL-107+Perpetual/course/).
-Please reach out to your Kong Account Representative if you would like to access
-the course material.
-
-This repository provides a template for creating your own end-to-end [APIOps
-workflow](https://konghq.com/blog/what-is-apiops) leveraging the [Kong API
-Gateway](https://konghq.com/kong/), the world's most popular API gateway.
+This repository provides a template for creating your own end-to-end APIOps
+workflow leveraging the Kong API Gateway, the world's most popular API gateway.
 Following this workshop, you will:
 
 - Using [Insomnia's](https://insomnia.rest/) `inso` CLI, convert an OpenAPI
