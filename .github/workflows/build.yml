@@ -23,10 +23,10 @@ jobs:
           
       - name: Install Insomnia
         run: |
-          curl -1sLf https://packages.konghq.com/public/insomnia/setup.deb.sh | sudo -E distro=ubuntu codename=focal bash
-          sudo apt-get update
-          sudo apt-get install insomnia  
+          wget https://github.com/Kong/insomnia/releases/download/lib%408.6.1/inso-linux-8.6.1.tar.xz
+          tar -xf inso-linux-8.6.1.tar.xz 
+          ls
           
       - name: Lint OAS spec
-        run: inso lint spec ./kong-config/spec.yaml    
+        run: ./inso lint spec ./kong-config/spec.yaml    
 
