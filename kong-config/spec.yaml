@@ -16,8 +16,7 @@ paths:
       description: Retrieve a simple hello message.
       operationId: getHelloMessage
       tags:
-        - name: Hello
-          description: Operations related to greeting
+        - Hello
       responses:
         '200':
           description: Successful response
