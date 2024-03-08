@@ -49,14 +49,14 @@ jobs:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
   
       - name: Backup existing configuration
-        run:  deck gateway dump --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME > kong-backup.yaml
+        run:  deck gateway dump --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME --tls-skip-verify > kong-backup.yaml
         env: 
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
 
       - name: Apply new configuration
         run: |
-           deck sync -s kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME 
+           deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME  --tls-skip-verify
            sleep 10
         env: 
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
