@@ -3,9 +3,8 @@
 name: konnect-workflow
 
 on:
-  push:
-    branches:
-      - apiops
+  workflow_dispatch:
+  
 jobs:
   build:
     # The type of runner that the job will run on
