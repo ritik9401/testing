@@ -35,13 +35,13 @@ jobs:
          deck file openapi2kong --spec ./kong-config/spec.yaml --output-file kong.yaml 
 
       - name: Add Global plugins
-        run:  cat kong.yaml | deck file add-plugins global-plugin.yaml -o kong.yaml 
+        run:  cat kong.yaml | deck file add-plugins ./kong-config/global-plugin.yaml -o kong.yaml 
 
       - name: Add Route plugins
-        run:  cat kong.yaml | deck file add-plugins route-level-plugin.yaml -o kong.yaml 
+        run:  cat kong.yaml | deck file add-plugins ./kong-config/route-level-plugin.yaml -o kong.yaml 
 
       - name: Add Service plugins
-        run:  cat kong.yaml | deck file add-plugins service-level-plugin.yaml -o kong.yaml
+        run:  cat kong.yaml | deck file add-plugins ./kong-config/service-level-plugin.yaml -o kong.yaml
 
       - name: Ping to Konnect Org
         run:  deck gateway ping --konnect-token $KONNECT_TOKEN 
