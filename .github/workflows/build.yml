@@ -56,7 +56,7 @@ jobs:
 
       - name: Apply new configuration
         run: |
-           deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME > kong-backup.yaml
+           deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME 
            sleep 10
         env: 
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
