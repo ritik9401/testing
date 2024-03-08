@@ -6,10 +6,9 @@ on:
   workflow_dispatch:
   
 jobs:
-  build:
-    # The type of runner that the job will run on
+  deploy_to_konnect:
     runs-on: ubuntu-latest
-
+    name: Deploying Kong Configuration
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -34,5 +33,20 @@ jobs:
       - name: Generate new gateway configuration
         run: | 
          deck file openapi2kong --spec ./kong-config/spec.yaml --output-file kong.yaml 
-         ls
+
+      - name: Add Global plugins
+        run:  cat kong.yaml | deck file add-plugins global-plugin.yaml -o kong.yaml 
+
+      - name: Add Route plugins
+        run:  cat kong.yaml | deck file add-plugins route-level-plugin.yaml -o kong.yaml 
+
+      - name: Add Service plugins
+        run:  cat kong.yaml | deck file add-plugins service-level-plugin.yaml -o kong.yaml
+
+      - name: Backup existing configuration
+        run:  deck gateway dump --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME > kong-backup.yaml
+
+        
+
+        
 
