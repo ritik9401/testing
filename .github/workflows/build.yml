@@ -25,6 +25,7 @@ jobs:
         run: |
           wget https://github.com/Kong/insomnia/releases/download/lib%408.6.1/inso-linux-8.6.1.tar.xz
           tar -xf inso-linux-8.6.1.tar.xz 
+          sudo cp inso /usr/local/bin/
           ls
           
       - name: Lint OAS spec
