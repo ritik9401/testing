@@ -32,5 +32,7 @@ jobs:
         run: ./inso lint spec ./kong-config/spec.yaml  
 
       - name: Generate new gateway configuration
-        run: deck file openapi2kong --spec ./kong-config/spec.yaml --output-file kong.yaml 
+        run: | 
+         deck file openapi2kong --spec ./kong-config/spec.yaml --output-file kong.yaml 
+         ls
 
