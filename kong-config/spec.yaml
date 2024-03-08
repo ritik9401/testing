@@ -2,6 +2,10 @@ openapi: 3.0.0
 info:
   title: Sample API
   version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+    url: https://example.com/support
 servers:
   - url: 'https://rakeshkumawat-eval-test.apigee.net'
 paths:
@@ -9,6 +13,9 @@ paths:
     get:
       summary: Get Hello Message
       description: Retrieve a simple hello message.
+      operationId: getHelloMessage
+      tags:
+        - Hello
       responses:
         '200':
           description: Successful response
