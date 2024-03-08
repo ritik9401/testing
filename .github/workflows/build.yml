@@ -43,9 +43,25 @@ jobs:
       - name: Add Service plugins
         run:  cat kong.yaml | deck file add-plugins service-level-plugin.yaml -o kong.yaml
 
+      - name: Ping to Konnect Org
+        run:  deck gateway ping --konnect-token $KONNECT_TOKEN 
+        env: 
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+  
       - name: Backup existing configuration
         run:  deck gateway dump --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME > kong-backup.yaml
+        env: 
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+          CP_NAME: ${{ secrets.CP_NAME }}
 
+      - name: Apply new configuration
+        run: |
+           deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME > kong-backup.yaml
+           sleep 10
+        env: 
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+          CP_NAME: ${{ secrets.CP_NAME }}       
+          
         
 
         
