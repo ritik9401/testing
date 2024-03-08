@@ -2,6 +2,7 @@ openapi: 3.0.0
 info:
   title: Sample API
   version: 1.0.0
+  description: This is a sample API description.
   contact:
     name: API Support
     email: support@example.com
@@ -15,7 +16,8 @@ paths:
       description: Retrieve a simple hello message.
       operationId: getHelloMessage
       tags:
-        - Hello
+        - name: Hello
+          description: Operations related to greeting
       responses:
         '200':
           description: Successful response
