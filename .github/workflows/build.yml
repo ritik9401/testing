@@ -65,4 +65,12 @@ jobs:
       - name: Run API Tests
         id: apiTests
         run: ./inso --src ./insomnia/Insomnia_2024-03-13.json run test spc_3c9d47
+     
+      - name: Back out changes on failure
+        if: always() && steps.apiTests.outcome == 'failure'
+        run :  deck gateway sync kong-backup.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME  --select-tag=hello --tls-skip-verify
+        env: 
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+          CP_NAME: ${{ secrets.CP_NAME }}
+
           
