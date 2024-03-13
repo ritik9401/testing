@@ -61,6 +61,10 @@ jobs:
         env: 
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}       
+
+      - name: Run API Tests
+        id: apiTests
+        run: ./inso run test -w ./.insomnia hello-api-collection.yaml
           
         
 
