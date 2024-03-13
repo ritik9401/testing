@@ -67,7 +67,7 @@ jobs:
 
       - name: Run API Tests
         id: apiTests
-        run: ./inso --src ./insomnia/Insomnia_2024-03-13.json run test spc_3c9d47
+        run: ./inso --src ./insomnia/Insomnia_2024-03-13.json run test spc_24b77d
      
       - name: Back out changes on failure
         if: always() && steps.apiTests.outcome == 'failure'
