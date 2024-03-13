@@ -64,7 +64,7 @@ jobs:
 
       - name: Run API Tests
         id: apiTests
-        run: ./inso run test -w ./insomnia hello-api-collection.yaml
+        run: ./inso run test hello-api-collection.yaml
           
         
 
