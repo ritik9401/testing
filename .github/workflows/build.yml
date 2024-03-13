@@ -32,7 +32,7 @@ jobs:
 
       - name: Generate new gateway configuration
         run: | 
-         deck file openapi2kong --spec ./kong-config/spec.yaml --select-tag=hello --output-file kong.yaml 
+         deck file openapi2kong --spec ./kong-config/spec.yaml --select-tag=hello,${{github.run_number}} --output-file kong.yaml 
 
       - name: Add Global plugins
         run:  cat kong.yaml | deck file add-plugins ./kong-config/global-plugin.yaml -o kong.yaml 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Apply new configuration
         run: |
-           deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME  --select-tag=hello --tls-skip-verify
+           deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME  --select-tag=hello,${{github.run_number}} --tls-skip-verify
            sleep 10
         env: 
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
