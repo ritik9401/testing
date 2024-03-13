@@ -209,7 +209,7 @@ jobs:
 
           # Replace the URL in the spec content using sed
           new_url="https://13.234.7.19:8443"
-          modified_spec_content=$(echo "$spec_content" | sed "s/url: .*/url: '$new_url'/")
+          modified_spec_content=$(echo "$spec_content" | sed "s#url: .*$#url: '$new_url'#")
 
           # Write the modified spec content back to the file
           echo "$modified_spec_content" > "$spec_file"
