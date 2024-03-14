@@ -8,7 +8,7 @@ info:
     email: support@example.com
     url: https://example.com/support
 servers:
-  - url: https://rakeshkumawat-eval-test.apigee.net
+  - url: 'https://rakeshkumawat-eval-test.apigee.net'
 paths:
   /hello:
     get:
