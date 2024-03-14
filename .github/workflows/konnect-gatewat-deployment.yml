@@ -202,8 +202,9 @@ jobs:
                        }"
 
       - name: Update Spec Url
-        run: cat ./kong-config/spec.yaml | yq eval '.servers[0].url = "https://13.234.7.19:8443"' > ./kong-config/spec.yaml
-
+        run: |
+          cat ./kong-config/spec.yaml | yq eval '.servers[0].url = "https://13.234.7.19:8443"' > ./kong-config/spec.yaml
+          cat ./kong-config/spec.yaml
 
       - name: Upload spec on the version
         run: |
