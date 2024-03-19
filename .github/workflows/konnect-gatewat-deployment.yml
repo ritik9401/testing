@@ -203,7 +203,7 @@ jobs:
 
       - name: Update Spec Url
         run: |
-          yq eval '.servers[0].url = "${{ vars.NEW_URL }}"' -i ./kong-config/spec.yaml
+          yq eval '.servers[0].url = "${{ vars.Data_Plane_URL }}"' -i ./kong-config/spec.yaml
           cat ./kong-config/spec.yaml
 
       - name: Upload spec on the version
