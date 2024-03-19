@@ -203,11 +203,7 @@ jobs:
 
       - name: Update Spec Url
         run: |
-          # sed -i "s#^\s*url: .*\$#  url: 'https://13.234.7.19:8443'#" ./kong-config/spec.yaml
-          new_url='https://13.234.7.19:8443'
-          yq eval '.servers[0].url = "https://13.234.7.19:8443"' -i ./kong-config/spec.yaml
-          # sed -i "s#^\(\s*- url: \).*$#\1'$new_url'#" ./kong-config/spec.yaml
-          # cat ./kong-config/spec.yaml | yq eval '.servers[0].url = "https://13.234.7.19:8443"' > ./kong-config/spec.yaml
+          yq eval '.servers[0].url = "${{ vars.NEW_URL }}"' -i ./kong-config/spec.yaml
           cat ./kong-config/spec.yaml
 
       - name: Upload spec on the version
