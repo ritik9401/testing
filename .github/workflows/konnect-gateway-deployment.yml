@@ -32,7 +32,8 @@ jobs:
           deck version
 
       - name: Lint OAS spec using Spectral
-        run: spectral lint ./kong-config/"spec.yaml" --ruleset .spectral.yaml
+        run: run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+
 
       - name: Generate new gateway configuration
         run: |
