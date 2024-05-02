@@ -1,40 +1,171 @@
-openapi: 3.0.0
-info:
-  title: Sample API
-  version: 1.0.0
-  description: This is a sample API description.
-  contact:
-    name: API Support
-    email: support@example.com
-    url: https://example.com/support
-servers:
-  - url: 'https://rakeshkumawat-eval-test.apigee.net'
-paths:
-  /hello:
-    get:
-      summary: Get Hello Message
-      description: Retrieve a simple hello message.
-      operationId: getHelloMessage
-      tags:
-        - Hello
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Hello, world!
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Invalid request
+{
+	"info": {
+		"_postman_id": "ef0ac5dc-076b-4fa4-9a52-d18c63f2d261",
+		"name": "testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31918775"
+	},
+	"item": [
+		{
+			"name": "test1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// In the \"Tests\" tab of your request in Postman\r",
+							"pm.test(\"Check Response Code\", function () {\r",
+							"    var responseCode = pm.response.code;\r",
+							"    if (responseCode !== 200) {\r",
+							"        pm.environment.set(\"rollback_required\", \"true\");\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://13.232.185.239:8000/hello?apikey=test",
+					"protocol": "http",
+					"host": [
+						"13",
+						"232",
+						"185",
+						"239"
+					],
+					"port": "8000",
+					"path": [
+						"hello"
+					],
+					"query": [
+						{
+							"key": "apikey",
+							"value": "test"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "New Request",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://13.232.185.239:8000/hello?apikey=test",
+							"protocol": "http",
+							"host": [
+								"13",
+								"232",
+								"185",
+								"239"
+							],
+							"port": "8000",
+							"path": [
+								"hello"
+							],
+							"query": [
+								{
+									"key": "apikey",
+									"value": "test"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "68"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "RateLimit-Reset",
+							"value": "29"
+						},
+						{
+							"key": "RateLimit-Remaining",
+							"value": "9"
+						},
+						{
+							"key": "RateLimit-Limit",
+							"value": "10"
+						},
+						{
+							"key": "X-RateLimit-Limit-Minute",
+							"value": "10"
+						},
+						{
+							"key": "X-RateLimit-Remaining-Minute",
+							"value": "9"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Apigee"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "ALLOW-FROM RESOURCE-URL"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"44-CEUgnYG0NJDL6LrhICHvaqpvG70\""
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 17 Apr 2024 05:57:31 GMT"
+						},
+						{
+							"key": "Via",
+							"value": "kong/3.6.1.1-enterprise-edition"
+						},
+						{
+							"key": "Alt-Svc",
+							"value": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+						},
+						{
+							"key": "X-Kong-Upstream-Latency",
+							"value": "261"
+						},
+						{
+							"key": "X-Kong-Proxy-Latency",
+							"value": "1"
+						},
+						{
+							"key": "X-Kong-Request-Id",
+							"value": "13a24f59a5772c09409f3d2e0c6ba674"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"city\": \"San Jose\",\n    \"state\": \"CA\"\n}"
+				}
+			]
+		}
+	]
+}
