@@ -12,41 +12,7 @@
 				"method": "GET",
 				"header": []
 			},
-			"response": [
-				{
-					"name": "New Request",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://3.91.218.179:8000/hello?apiket=test-key",
-							"protocol": "http",
-							"host": [
-								"3",
-								"91",
-								"218",
-								"179"
-							],
-							"port": "8000",
-							"path": [
-								"hello"
-							],
-							"query": [
-								{
-									"key": "apiket",
-									"value": "test-key"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": null,
-					"header": null,
-					"cookie": [],
-					"body": null
-				}
-			]
+			"response": []
 		},
 		{
 			"name": "http://3.91.218.179:8000/hello?apikey=test-key",
@@ -82,35 +48,7 @@
 				"method": "GET",
 				"header": []
 			},
-			"response": [
-				{
-					"name": "New Request",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://3.91.218.179:8000/hello",
-							"protocol": "http",
-							"host": [
-								"3",
-								"91",
-								"218",
-								"179"
-							],
-							"port": "8000",
-							"path": [
-								"hello"
-							]
-						}
-					},
-					"status": "Unauthorized",
-					"code": 401,
-					"_postman_previewlanguage": null,
-					"header": null,
-					"cookie": [],
-					"body": null
-				}
-			]
+			"response": []
 		},
 		{
 			"name": "http://3.91.218.179:8000/hello?apiket=test-key",
