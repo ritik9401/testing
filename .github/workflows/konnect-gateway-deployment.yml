@@ -89,28 +89,28 @@ jobs:
       - name: Fetch environment variables
         id: set_env_vars
         run: |
-          echo "API_PRODUCT_NAME: ${{ secrets.API_PRODUCT_NAME }}"
-          echo "CONTROL_PLANE_NAME: ${{ secrets.CONTROL_PLANE_NAME }}"
-          echo "GATEWAY_SERVICE_NAME: ${{ secrets.GATEWAY_SERVICE_NAME }}"
+          echo "API_PRODUCT_NAME: ${{ vars.API_PRODUCT_NAME }}"
+          echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
+          echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
 
       - name: Create API product
         run: |
           curl --request POST \
-            --url ${{ secrets.ADMIN_API_URL }}/api-products \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            --url ${{ vars.ADMIN_API_URL }}/api-products \
+            --header 'Authorization: ${{ secret.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data '{
-              "name": "${{ secrets.API_PRODUCT_NAME }}",
+              "name": "${{ vars.API_PRODUCT_NAME }}",
               "description": "Creating through admin api",
               "labels": {}
             }'
 
       - name: Get API product ID
         run: |
-          api_product_name="${{ secrets.API_PRODUCT_NAME }}"
+          api_product_name="${{ vars.API_PRODUCT_NAME }}"
 
           api_product_id=$(curl --request GET \
-            --url ${{ secrets.ADMIN_API_URL }}/api-products \
+            --url ${{ vars.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
 
@@ -124,7 +124,7 @@ jobs:
       - name: Get Dev Portal ID
         run: |
           Dev_portal_id=$(curl --request GET \
-            --url ${{ secrets.ADMIN_API_URL }}/portals \
+            --url ${{ vars.ADMIN_API_URL }}/portals \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r '.data[].id')
           echo "DEV_PORTAL_ID=$Dev_portal_id" >> $GITHUB_ENV
@@ -134,7 +134,7 @@ jobs:
           echo "API Product ID: $API_PRODUCT_ID"
           echo "Dev Portal ID: $DEV_PORTAL_ID"
           curl --request PATCH \
-            --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
+            --url ${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data "{
@@ -146,7 +146,7 @@ jobs:
           echo "API Product ID: $API_PRODUCT_ID"
 
           api_product_version_id=$(curl --request POST \
-            --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
+            --url ${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data '{
