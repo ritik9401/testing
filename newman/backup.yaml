@@ -93,29 +93,17 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ secrets.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ secrets.GATEWAY_SERVICE_NAME }}"
 
-      - name: Check API Product is already exist or not or Creating new API product
+      - name: Create API product
         run: |
-          response=$(curl -s --request GET \
-            --url "${{ secret.ADMIN_API_URL }}/api-products" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
-
-          if [[ $response == *"${{ secret.API_PRODUCT_NAME }}"* ]]; then
-              echo "API product already exists, Please change the API product name"
-              echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
-              
-          else
-            echo "API product dosen't exist, creating..."
-            curl --request POST \
-              --url ${{ secret.ADMIN_API_URL }}/api-products \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "name": "${{ secrets.API_PRODUCT_NAME }}",
-                "description": "Creating through admin api",
-                "labels": {}
-              }'
-          fi 
-
+          curl --request POST \
+            --url ${{ secrets.ADMIN_API_URL }}/api-products \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data '{
+              "name": "${{ secrets.API_PRODUCT_NAME }}",
+              "description": "Creating through admin api",
+              "labels": {}
+            }'
 
       - name: Get API product ID
         run: |
