@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "abb4bd1d-0287-41e2-9b60-bb715ee47ber",
+		"_postman_id": "abb4bd1d-0287-41e2-9b60-bb715ee47bce",
 		"name": "New Collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "31918775"
@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://3.91.218.171:8000/hello?apikey=test-key",
+					"raw": "http://3.91.218.179:8000/hello?apikey=test-key",
 					"protocol": "http",
 					"host": [
 						"3",
@@ -39,7 +39,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://3.91.218.171:8000/hello?apikey=test-key",
+							"raw": "http://3.91.218.179:8000/hello?apikey=test-key",
 							"protocol": "http",
 							"host": [
 								"3",
