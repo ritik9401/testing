@@ -60,7 +60,7 @@ jobs:
 
       - name: Apply new configuration
         run: |
-          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
+          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }}  --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
