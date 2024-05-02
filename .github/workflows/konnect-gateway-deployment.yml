@@ -53,17 +53,17 @@ jobs:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
 
       - name: Backup existing configuration
-        run: deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CPG_NAME }} --tls-skip-verify > kong-backup.yaml
+        run: deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --tls-skip-verify > kong-backup.yaml
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
-          CPG_NAME: ${{ secrets.CPG_NAME }}
+          CP_NAME: ${{ secrets.CP_NAME }}
 
       - name: Apply new configuration
         run: |
-          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CPG_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
+          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
-          CPG_NAME: ${{ secrets.CPG_NAME }}
+          CP_NAME: ${{ secrets.CP_NAME }}
 
 
       - name: Run API Tests
@@ -73,10 +73,10 @@ jobs:
 
       - name: Back out changes on failure
         if: always() && steps.apiTests.outcome == 'failure'
-        run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CPG_NAME }} --tls-skip-verify
+        run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
-          CPG_NAME: ${{ secrets.CPG_NAME }}
+          CP_NAME: ${{ secrets.CP_NAME }}
 
   publish-customer-api-to-portal:
     name: Publish OAS to dev portal
