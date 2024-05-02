@@ -39,7 +39,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://3.91.218.179:8000/hello?apikey=test-key",
+							"raw": "http://3.91.218.171:8000/hello?apikey=test-key",
 							"protocol": "http",
 							"host": [
 								"3",
