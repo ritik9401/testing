@@ -48,23 +48,23 @@ jobs:
         run: cat kong.yaml | deck file add-plugins ./kong-config/service-level-plugin.yaml -o kong.yaml
 
       - name: Ping to Konnect Org
-        run: deck gateway ping --konnect-token $KONNECT_TOKEN
+        run: deck gateway ping --konnect-token ${{ secrets.KONNECT_TOKEN }}
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
 
       - name: Backup existing configuration
-        run: deck gateway dump --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CPG_NAME --tls-skip-verify > kong-backup.yaml
+        run: deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CPG_NAME }} --tls-skip-verify > kong-backup.yaml
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CPG_NAME: ${{ secrets.CPG_NAME }}
 
       - name: Apply new configuration
         run: |
-          deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CPG_NAME --select-tag=hello,dev --tls-skip-verify
-          sleep 10
+          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CPG_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CPG_NAME: ${{ secrets.CPG_NAME }}
+
 
       - name: Run API Tests
         id: apiTests
@@ -73,7 +73,7 @@ jobs:
 
       - name: Back out changes on failure
         if: always() && steps.apiTests.outcome == 'failure'
-        run: deck gateway sync kong-backup.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CPG_NAME --tls-skip-verify
+        run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CPG_NAME }} --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CPG_NAME: ${{ secrets.CPG_NAME }}
