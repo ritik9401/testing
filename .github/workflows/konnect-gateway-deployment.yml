@@ -34,7 +34,6 @@ jobs:
       - name: Lint OAS spec using Spectral
         run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
-
       - name: Generate new gateway configuration
         run: |
           deck file openapi2kong --spec ./kong-config/spec.yaml --select-tag=hello,dev --output-file kong.yaml
@@ -65,7 +64,6 @@ jobs:
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
-
 
       - name: Run API Tests
         id: apiTests
@@ -100,11 +98,11 @@ jobs:
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
 
           if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
-              echo "API product already exists, Please change the API product name"
-              echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
-              
+            echo "API product already exists, Please change the API product name"
+            echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
+            return  # Stop the job here since the product already exists
           else
-            echo "API product dosen't exist, creating..."
+            echo "API product doesn't exist, creating..."
             curl --request POST \
               --url ${{ vars.ADMIN_API_URL }}/api-products \
               --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
@@ -116,7 +114,6 @@ jobs:
               }'
           fi 
 
-
       - name: Get API product ID
         run: |
           api_product_name="${{ vars.API_PRODUCT_NAME }}"
@@ -124,7 +121,7 @@ jobs:
           api_product_id=$(curl --request GET \
             --url ${{ vars.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r --arg api_product_name "tase-product" '.data[] | select(.name == $api_product_name) | .id // empty')
+            | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
 
           if [ "$api_product_id" = "empty" ]; then
             echo "Error: API Product ID not found."
