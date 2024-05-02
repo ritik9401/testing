@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "New Request",
+			"name": "successful",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -35,57 +35,7 @@
 			"response": []
 		},
 		{
-			"name": "http://3.91.218.179:8000/hello?apikey=test-key",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://3.91.218.179:8000/hello?apikey=test-key",
-					"protocol": "http",
-					"host": [
-						"3",
-						"91",
-						"218",
-						"179"
-					],
-					"port": "8000",
-					"path": [
-						"hello"
-					],
-					"query": [
-						{
-							"key": "apikey",
-							"value": "test-key"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "New Request",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://3.91.218.179:8000/hello",
-					"protocol": "http",
-					"host": [
-						"3",
-						"91",
-						"218",
-						"179"
-					],
-					"port": "8000",
-					"path": [
-						"hello"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "http://3.91.218.179:8000/hello?apiket=test-key",
+			"name": "failed",
 			"request": {
 				"method": "GET",
 				"header": [],
