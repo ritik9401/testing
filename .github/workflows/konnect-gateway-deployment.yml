@@ -97,7 +97,7 @@ jobs:
         run: |
           curl --request POST \
             --url ${{ vars.ADMIN_API_URL }}/api-products \
-            --header 'Authorization: ${{ secret.KONNECT_TOKEN }}' \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data '{
               "name": "${{ vars.API_PRODUCT_NAME }}",
