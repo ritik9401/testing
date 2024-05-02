@@ -32,8 +32,7 @@ jobs:
           deck version
 
       - name: Lint OAS spec using Spectral
-        run: run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
-
+        run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
       - name: Generate new gateway configuration
         run: |
@@ -87,7 +86,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Featch environment variables
+      - name: Fetch environment variables
         id: set_env_vars
         run: |
           echo "API_PRODUCT_NAME: ${{ secrets.API_PRODUCT_NAME }}"
@@ -135,12 +134,12 @@ jobs:
           echo "API Product ID: $API_PRODUCT_ID"
           echo "Dev Portal ID: $DEV_PORTAL_ID"
           curl --request PATCH \
-           --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
-           --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-           --header 'Content-Type: application/json' \
-           --data "{
-             \"portal_ids\":[\"$DEV_PORTAL_ID\"]
-           }"
+            --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data "{
+              \"portal_ids\":[\"$DEV_PORTAL_ID\"]
+            }"
 
       - name: Create the product version
         run: |
