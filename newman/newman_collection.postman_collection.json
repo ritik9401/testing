@@ -33,7 +33,7 @@
 							],
 							"query": [
 								{
-									"key": "apikey",
+									"key": "apiket",
 									"value": "test-key"
 								}
 							]
@@ -47,6 +47,34 @@
 					"body": null
 				}
 			]
+		},
+		{
+			"name": "http://3.91.218.179:8000/hello?apikey=test-key",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://3.91.218.179:8000/hello?apikey=test-key",
+					"protocol": "http",
+					"host": [
+						"3",
+						"91",
+						"218",
+						"179"
+					],
+					"port": "8000",
+					"path": [
+						"hello"
+					],
+					"query": [
+						{
+							"key": "apikey",
+							"value": "test-key"
+						}
+					]
+				}
+			},
+			"response": []
 		},
 		{
 			"name": "New Request",
@@ -83,6 +111,34 @@
 					"body": null
 				}
 			]
+		},
+		{
+			"name": "http://3.91.218.179:8000/hello?apiket=test-key",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://3.91.218.179:8000/hello?apiket=test-key",
+					"protocol": "http",
+					"host": [
+						"3",
+						"91",
+						"218",
+						"179"
+					],
+					"port": "8000",
+					"path": [
+						"hello"
+					],
+					"query": [
+						{
+							"key": "apiket",
+							"value": "test-key"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
