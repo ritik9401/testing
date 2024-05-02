@@ -60,7 +60,7 @@ jobs:
 
       - name: Apply new configuration
         run: |
-          deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CP_NAME --select-tag=hello,dev --tls-skip-verify
+          deck gateway sync kong.yaml --konnect-token $KONNECT_TOKEN --konnect-control-plane-name $CPG_NAME --select-tag=hello,dev --tls-skip-verify
           sleep 10
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
