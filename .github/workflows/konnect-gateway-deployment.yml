@@ -93,17 +93,29 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
 
-      - name: Create API product
+      - name: Check API Product is already exist or not or Creating new API product
         run: |
-          curl --request POST \
-            --url ${{ vars.ADMIN_API_URL }}/api-products \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            --header 'Content-Type: application/json' \
-            --data '{
-              "name": "${{ vars.API_PRODUCT_NAME }}",
-              "description": "Creating through admin api",
-              "labels": {}
-            }'
+          response=$(curl -s --request GET \
+            --url "${{ vars.ADMIN_API_URL }}/api-products" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
+
+          if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
+              echo "API product already exists, Please change the API product name"
+              echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
+              
+          else
+            echo "API product dosen't exist, creating..."
+            curl --request POST \
+              --url ${{ vars.ADMIN_API_URL }}/api-products \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "${{ vars.API_PRODUCT_NAME }}",
+                "description": "Creating through admin api",
+                "labels": {}
+              }'
+          fi 
+
 
       - name: Get API product ID
         run: |
@@ -112,7 +124,7 @@ jobs:
           api_product_id=$(curl --request GET \
             --url ${{ vars.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
+            | jq -r --arg api_product_name "tase-product" '.data[] | select(.name == $api_product_name) | .id // empty')
 
           if [ "$api_product_id" = "empty" ]; then
             echo "Error: API Product ID not found."
