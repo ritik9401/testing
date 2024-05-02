@@ -69,8 +69,7 @@ jobs:
 
       - name: Run API Tests
         id: apiTests
-        run: |
-          newman run newman/newman_collection.postman_collection.json
+        run: newman run newman/newman_collection.postman_collection.json
 
       - name: Back out changes on failure
         if: always() && steps.apiTests.outcome == 'failure'
