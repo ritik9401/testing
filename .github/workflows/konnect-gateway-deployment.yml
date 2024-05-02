@@ -34,7 +34,6 @@ jobs:
       - name: Lint OAS spec using Spectral
         run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
-
       - name: Generate new gateway configuration
         run: |
           deck file openapi2kong --spec ./kong-config/spec.yaml --select-tag=hello,dev --output-file kong.yaml
@@ -66,7 +65,6 @@ jobs:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
 
-
       - name: Run API Tests
         id: apiTests
         run: newman run newman/newman_collection.postman_collection.json
@@ -95,20 +93,26 @@ jobs:
 
       - name: Check API Product is already exist or not or Creating new API product
         run: |
-          api_product_name="${{ vars.API_PRODUCT_NAME }}"
+          response=$(curl -s --request GET \
+            --url "${{ vars.ADMIN_API_URL }}/api-products" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
 
-          api_product_id=$(curl --request GET \
-            --url ${{ vars.ADMIN_API_URL }}/api-products \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
-
-          if [ "$api_product_id" = "empty" ]; then
-            echo "Error: API Product ID not found."
-            exit 1
-          fi
-
-          echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
-
+          if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
+            echo "API product already exists, Please change the API product name"
+            echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
+            exit 1  # Terminate the job here since the product already exists
+          else
+            echo "API product doesn't exist, creating..."
+            curl --request POST \
+              --url ${{ vars.ADMIN_API_URL }}/api-products \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "${{ vars.API_PRODUCT_NAME }}",
+                "description": "Creating through admin api",
+                "labels": {}
+              }'
+          fi 
 
       - name: Get API product ID
         run: |
@@ -117,7 +121,7 @@ jobs:
           api_product_id=$(curl --request GET \
             --url ${{ vars.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r --arg api_product_name "tase-product" '.data[] | select(.name == $api_product_name) | .id // empty')
+            | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
 
           if [ "$api_product_id" = "empty" ]; then
             echo "Error: API Product ID not found."
