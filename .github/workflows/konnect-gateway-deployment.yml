@@ -73,7 +73,7 @@ jobs:
 
       - name: Back out changes on failure
         if: always() && steps.apiTests.outcome == 'failure'
-        run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --tls-skip-verify
+        run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
