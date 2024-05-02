@@ -40,7 +40,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://3.91.218.179:8000/hello?apiket=test-key",
+					"raw": "http://3.91.218.179:8000/hello?apikey=abc",
 					"protocol": "http",
 					"host": [
 						"3",
@@ -54,8 +54,8 @@
 					],
 					"query": [
 						{
-							"key": "apiket",
-							"value": "test-key"
+							"key": "apikey",
+							"value": "abc"
 						}
 					]
 				}
