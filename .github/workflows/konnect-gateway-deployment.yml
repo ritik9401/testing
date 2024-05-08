@@ -4,21 +4,10 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
-
----
-name: Publish Spec to Kong
-on:
-  # push:
-  #   branches:
-  #     - main
-  workflow_dispatch:
     inputs:
       test_repo_name:
         description: 'API repository name'
         required: true
-      # plugin_repo_name:
-      #   description: 'Plugin reposistory name'
-      #   required: true
       environment:
         description: 'The environment to deploy to'
         required: true
@@ -71,8 +60,6 @@ jobs:
             echo "File does not exist."
             echo "confirmation=false" >> $GITHUB_ENV
           fi
-        env:
-          GITHUB_ENV: $GITHUB_ENV
 
       - name: Generate new gateway configuration
         run: |
@@ -156,7 +143,7 @@ jobs:
                 "description": "Creating through admin api",
                 "labels": {}
               }'
-          fi
+          fi 
         env:
           GITHUB_ENV: $GITHUB_ENV
 
@@ -229,10 +216,8 @@ jobs:
           control_plane_name="${{ secrets.CONTROL_PLANE_NAME }}"
 
           control_plane_id=$(curl --location '${{ secrets.ADMIN_API_URL }}/control-planes' \
-
-          --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-
-          | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
 
           echo "Control_Plane_ID=$control_plane_id" >> $GITHUB_ENV
         env:
@@ -256,11 +241,8 @@ jobs:
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           echo "API PRODUCT ID: $API_PRODUCT_ID"
-
           echo "Control Plane ID: $Control_Plane_ID"
-
           echo "Service ID: $Service_ID"
-
           echo "API Product Version ID: $API_Product_Version_ID"
 
           curl --location --request PATCH "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
@@ -284,8 +266,10 @@ jobs:
         run: |
           echo "API PRODUCT ID: $API_PRODUCT_ID"
           echo "API Product Version ID: $API_Product_Version_ID"
+
           encoded_spec=$(base64 -w 0 ./kong-config/${{ env.FILE }})
           echo $encoded_spec
+
           curl --location --request POST "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID/specifications" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
