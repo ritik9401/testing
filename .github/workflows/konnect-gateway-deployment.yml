@@ -217,12 +217,12 @@ jobs:
         run: |
           echo "API PRODUCT ID: $API_PRODUCT_ID"
           echo "API Product Version ID: $API_Product_Version_ID"
-          encoded_spec=$(base64 -w 0 ./kong-config/${{ env.FILE }})
+          encoded_spec=$(base64 -w 0 ./kong-config/spec.yaml)
           echo $encoded_spec
           curl --location --request POST "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID/specifications" \
-            --header 'Authorization: ${{ secrets.PIPELINE_TOKEN }}' \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data '{
-                    "name": "Student.yaml",
+                    "name": "Spec.yaml",
                     "content": "'"$encoded_spec"'"
                   }'
