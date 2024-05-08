@@ -1,14 +1,24 @@
-name: konnect-gateway-deployment
+name: konnect-gatewat-deployment
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
+  workflow_dispatch:
+
+---
+name: Publish Spec to Kong
+on:
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
     inputs:
       test_repo_name:
         description: 'API repository name'
         required: true
+      # plugin_repo_name:
+      #   description: 'Plugin reposistory name'
+      #   required: true
       environment:
         description: 'The environment to deploy to'
         required: true
@@ -61,6 +71,8 @@ jobs:
             echo "File does not exist."
             echo "confirmation=false" >> $GITHUB_ENV
           fi
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Generate new gateway configuration
         run: |
@@ -105,7 +117,7 @@ jobs:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
 
-  publish_spec_to_kong:
+  publish-customer-api-to-portal:
     name: Publish OAS to dev portal
     needs: deploy_to_konnect
     runs-on: ubuntu-latest
@@ -120,6 +132,8 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ secrets.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ secrets.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Check API Product is already exist or not or Creating new API product
         run: |
@@ -142,7 +156,9 @@ jobs:
                 "description": "Creating through admin api",
                 "labels": {}
               }'
-          fi 
+          fi
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Get API product ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
@@ -160,6 +176,8 @@ jobs:
           fi
 
           echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Get Dev Portal ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
@@ -169,6 +187,8 @@ jobs:
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r '.data[].id')
           echo "DEV_PORTAL_ID=$Dev_portal_id" >> $GITHUB_ENV
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Publish product to the dev portal
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
@@ -182,6 +202,8 @@ jobs:
             --data "{
               \"portal_ids\":[\"$DEV_PORTAL_ID\"]
             }"
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Create the product version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
@@ -198,6 +220,8 @@ jobs:
               "gateway_service": null
             }'| jq -r '.id')
           echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Get Control Plane ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
@@ -205,10 +229,14 @@ jobs:
           control_plane_name="${{ secrets.CONTROL_PLANE_NAME }}"
 
           control_plane_id=$(curl --location '${{ secrets.ADMIN_API_URL }}/control-planes' \
+
           --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+
           | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
 
           echo "Control_Plane_ID=$control_plane_id" >> $GITHUB_ENV
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Get Service ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
@@ -221,13 +249,18 @@ jobs:
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "Service_ID=$service_id" >> $GITHUB_ENV
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Link service to the product version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           echo "API PRODUCT ID: $API_PRODUCT_ID"
+
           echo "Control Plane ID: $Control_Plane_ID"
+
           echo "Service ID: $Service_ID"
+
           echo "API Product Version ID: $API_Product_Version_ID"
 
           curl --location --request PATCH "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
@@ -243,6 +276,8 @@ jobs:
                         \"id\": \"$Service_ID\"
                                 }
                        }"
+        env:
+          GITHUB_ENV: $GITHUB_ENV
 
       - name: Upload spec on the version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
@@ -258,3 +293,5 @@ jobs:
                     "name": "test.yaml",
                     "content": "'"$encoded_spec"'"
                   }'
+        env:
+          GITHUB_ENV: $GITHUB_ENV
