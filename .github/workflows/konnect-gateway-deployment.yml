@@ -211,17 +211,6 @@ jobs:
               }
             }"
 
-      - name: Find spec file name in the directory and set environment variables
-        run: |
-          YAML_FILE=$(ls -p ./kong-config/ | grep -v /)
-          echo "FILE=$YAML_FILE" >> $GITHUB_ENV
-          if [ -f "./kong-config/$YAML_FILE" ]; then
-            echo "File already exists."
-            echo "confirmation=true" >> $GITHUB_ENV
-          else
-            echo "File does not exist."
-            echo "confirmation=false" >> $GITHUB_ENV
-          fi
 
       - name: Upload spec for the version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
