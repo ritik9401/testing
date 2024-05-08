@@ -210,3 +210,30 @@ jobs:
                 \"id\": \"$Service_ID\"
               }
             }"
+
+      - name: Find spec file name in the directory and set environment variables
+        run: |
+          YAML_FILE=$(ls -p ./kong-config/ | grep -v /)
+          echo "FILE=$YAML_FILE" >> $GITHUB_ENV
+          if [ -f "./kong-config/$YAML_FILE" ]; then
+            echo "File already exists."
+            echo "confirmation=true" >> $GITHUB_ENV
+          else
+            echo "File does not exist."
+            echo "confirmation=false" >> $GITHUB_ENV
+          fi
+
+      - name: Upload spec for the version
+        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
+        run: |
+          echo "API PRODUCT ID: $API_PRODUCT_ID"
+          echo "API Product Version ID: $API_Product_Version_ID"
+          encoded_spec=$(base64 -w 0 ./kong-config/${{ env.FILE }})
+          echo $encoded_spec
+          curl --location --request POST "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID/specifications" \
+            --header 'Authorization: ${{ secrets.PIPELINE_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data '{
+                    "name": "Student.yaml",
+                    "content": "'"$encoded_spec"'"
+                  }'
