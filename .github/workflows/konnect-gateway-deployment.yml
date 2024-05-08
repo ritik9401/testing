@@ -40,10 +40,7 @@ jobs:
           YAML_FILE=$(ls -p | grep -v /)
           echo "file_without_extension=${YAML_FILE%.*}" >> $GITHUB_ENV
           echo "FILE=$YAML_FILE" >> $GITHUB_ENV
-
-      - name: check kong file exists or not
-        run: |
-          if [ -f "./kong-config/-${{ env.file_without_extension }}.yaml" ]; then
+          if [ -f "-${YAML_FILE%.*}.yaml" ]; then
             echo "File already exists."
             echo "confirmation=true" >> $GITHUB_ENV
           else
