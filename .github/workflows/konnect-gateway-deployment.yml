@@ -8,6 +8,7 @@ on:
 jobs:
   deploy_to_konnect:
     runs-on: ubuntu-latest
+    name: Deploying Kong Configuration
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -30,37 +31,21 @@ jobs:
           sudo cp /tmp/deck /usr/local/bin/
           deck version
 
-      - name: Find spec file name in the directory and set environment variables
-        run: |
-          cd ./kong-config/
-          YAML_FILE=$(ls -p | grep -v /)
-          echo "file_without_extension=${YAML_FILE%.*}" >> $GITHUB_ENV
-          echo "FILE=$YAML_FILE" >> $GITHUB_ENV
-          if [ -f "${YAML_FILE%.*}.yaml" ]; then
-            echo "File already exists."
-            echo "confirmation=true" >> $GITHUB_ENV
-          else
-            echo "File does not exist."
-            echo "confirmation=false" >> $GITHUB_ENV
-          fi
-        env:
-          GITHUB_ENV: $GITHUB_ENV
+      - name: Lint OAS spec using Spectral
+        run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
       - name: Generate new gateway configuration
         run: |
-          deck file openapi2kong --spec ./kong-config/${{ env.FILE }} --select-tag=hello,dev --output-file kong.yaml
+          deck file openapi2kong --spec ./kong-config/spec.yaml --select-tag=hello,dev --output-file kong.yaml
 
       - name: Add Global plugins
-        run: |
-          cat kong.yaml | deck file add-plugins ./kong-config/global-plugin.yaml -o kong.yaml
+        run: cat kong.yaml | deck file add-plugins ./kong-config/global-plugin.yaml -o kong.yaml
 
       - name: Add Route plugins
-        run: |
-          cat kong.yaml | deck file add-plugins ./kong-config/route-level-plugin.yaml -o kong.yaml
+        run: cat kong.yaml | deck file add-plugins ./kong-config/route-level-plugin.yaml -o kong.yaml
 
       - name: Add Service plugins
-        run: |
-          cat kong.yaml | deck file add-plugins ./kong-config/service-level-plugin.yaml -o kong.yaml
+        run: cat kong.yaml | deck file add-plugins ./kong-config/service-level-plugin.yaml -o kong.yaml
 
       - name: Ping to Konnect Org
         run: deck gateway ping --konnect-token ${{ secrets.KONNECT_TOKEN }}
@@ -74,7 +59,6 @@ jobs:
           CP_NAME: ${{ secrets.CP_NAME }}
 
       - name: Apply new configuration
-        if: env.confirmation == 'false'
         run: |
           deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
         env:
@@ -93,8 +77,9 @@ jobs:
           CP_NAME: ${{ secrets.CP_NAME }}
 
   publish-customer-api-to-portal:
-    runs-on: ubuntu-latest
+    name: Publish OAS to dev portal
     needs: deploy_to_konnect
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -105,7 +90,6 @@ jobs:
           echo "API_PRODUCT_NAME: ${{ vars.API_PRODUCT_NAME }}"
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
-          echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
 
       - name: Check API Product is already exist or not or Creating new API product
         run: |
@@ -131,7 +115,6 @@ jobs:
           fi 
 
       - name: Get API product ID
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           api_product_name="${{ vars.API_PRODUCT_NAME }}"
 
@@ -148,7 +131,6 @@ jobs:
           echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
 
       - name: Get Dev Portal ID
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           Dev_portal_id=$(curl --request GET \
             --url ${{ vars.ADMIN_API_URL }}/portals \
@@ -157,7 +139,6 @@ jobs:
           echo "DEV_PORTAL_ID=$Dev_portal_id" >> $GITHUB_ENV
 
       - name: Publish product to the dev portal
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           echo "API Product ID: $API_PRODUCT_ID"
           echo "Dev Portal ID: $DEV_PORTAL_ID"
@@ -170,7 +151,6 @@ jobs:
             }"
 
       - name: Create the product version
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           echo "API Product ID: $API_PRODUCT_ID"
 
@@ -184,69 +164,3 @@ jobs:
               "gateway_service": null
             }'| jq -r '.id')
           echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
-
-      - name: Get Control Plane ID
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: |
-          control_plane_name="${{ vars.CONTROL_PLANE_NAME }}"
-
-          control_plane_id=$(curl --location '${{ vars.ADMIN_API_URL }}/control-planes' \
-
-          --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-
-          | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
-
-          echo "Control_Plane_ID=$control_plane_id" >> $GITHUB_ENV
-
-      - name: Get Service ID
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: |
-          echo "Control Plane Id: $Control_Plane_ID"
-
-          gateway_service_name="${{ vars.GATEWAY_SERVICE_NAME }}"
-
-          service_id=$(curl --location "${{ vars.ADMIN_API_URL }}/control-planes/$Control_Plane_ID/core-entities/services" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
-          echo "Service_ID=$service_id" >> $GITHUB_ENV
-
-      - name: Link service to the product version
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: |
-          echo "API PRODUCT ID: $API_PRODUCT_ID"
-
-          echo "Control Plane ID: $Control_Plane_ID"
-
-          echo "Service ID: $Service_ID"
-
-          echo "API Product Version ID: $API_Product_Version_ID"
-
-          curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
-                --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-                --header 'Content-Type: application/json' \
-                --data "{
-                        \"name\": \"v1\",
-                        \"publish_status\": \"published\",
-                        \"deprecated\": false,
-                        \"notify\": true,
-                        \"gateway_service\": {
-                        \"control_plane_id\": \"$Control_Plane_ID\",
-                        \"id\": \"$Service_ID\"
-                                }
-                       }"
-
-
-      - name: Upload spec on the version
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: |
-          echo "API PRODUCT ID: $API_PRODUCT_ID"
-          echo "API Product Version ID: $API_Product_Version_ID"
-          encoded_spec=$(base64 -w 0 ./kong-config/${{ env.FILE }})
-          echo $encoded_spec
-          curl --location --request POST "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID/specifications" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            --header 'Content-Type: application/json' \
-            --data '{
-                    "name": "test.yaml",
-                    "content": "'"$encoded_spec"'"
-                  }'
