@@ -232,11 +232,12 @@ jobs:
         run: |
           echo "API PRODUCT ID: $API_PRODUCT_ID"
           echo "API Product Version ID: $API_Product_Version_ID"
-          curl --location --request POST "${{ vars.ADMIN_API_URL }}/portal/dev_portal_id/product-versions" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+          curl --request POST \
+            --url "${{ secrets.ADMIN_API_URL }}/portal/dev_portal_id/product-versions" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             --header 'Content-Type: application/json' \
             --data '{
-              "product_version_id": "$API_Product_Version_ID",
+              "product_version_id": "'"$API_Product_Version_ID"'",
               "auth_strategy_ids": [
                 "7cd596b8-06e8-4113-93ef-5f2941ad26d7"
               ],
