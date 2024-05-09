@@ -1,10 +1,11 @@
----
 name: konnect-gateway-deployment
+
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch: null
+    branches: 
+      - "main"
+  workflow_dispatch:
+
 jobs:
   deploy_to_konnect:
     runs-on: ubuntu-latest
@@ -12,74 +13,70 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+
       - name: Install Node.js and npm
         uses: actions/setup-node@v2
         with:
-          node-version: "16"
+          node-version: '16'
+
       - name: Install Newman
         run: npm install -g newman
+
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
+
       - name: Install Deck
-        run: >
-          curl -sL
-          https://github.com/kong/deck/releases/download/v1.34.0/deck_1.34.0_linux_amd64.tar.gz
-          -o deck.tar.gz
-
+        run: |
+          curl -sL https://github.com/kong/deck/releases/download/v1.34.0/deck_1.34.0_linux_amd64.tar.gz -o deck.tar.gz
           tar -xf deck.tar.gz -C /tmp
-
           sudo cp /tmp/deck /usr/local/bin/
-
           deck version
+
       - name: Lint OAS spec using Spectral
-        run: spectral lint ./kong-config/spec.yaml --ruleset
-          ./kong-config/.spectral.yaml
+        run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+
       - name: Generate new gateway configuration
-        run: >
-          deck file openapi2kong --spec ./kong-config/spec.yaml
-          --select-tag=hello,dev --output-file kong.yaml
+        run: |
+          deck file openapi2kong --spec ./kong-config/spec.yaml --select-tag=hello,dev --output-file kong.yaml
+
       - name: Add Global plugins
-        run: cat kong.yaml | deck file add-plugins ./kong-config/global-plugin.yaml -o
-          kong.yaml
+        run: cat kong.yaml | deck file add-plugins ./kong-config/global-plugin.yaml -o kong.yaml
+
       - name: Add Route plugins
-        run: cat kong.yaml | deck file add-plugins ./kong-config/route-level-plugin.yaml
-          -o kong.yaml
+        run: cat kong.yaml | deck file add-plugins ./kong-config/route-level-plugin.yaml -o kong.yaml
+
       - name: Add Service plugins
-        run: cat kong.yaml | deck file add-plugins
-          ./kong-config/service-level-plugin.yaml -o kong.yaml
+        run: cat kong.yaml | deck file add-plugins ./kong-config/service-level-plugin.yaml -o kong.yaml
+
       - name: Ping to Konnect Org
         run: deck gateway ping --konnect-token ${{ secrets.KONNECT_TOKEN }}
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+
       - name: Backup existing configuration
-        run: deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }}
-          --konnect-control-plane-name ${{ secrets.CP_NAME }}
-          --konnect-addr=https://eu.api.konghq.com --tls-skip-verify >
-          kong-backup.yaml
+        run: deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify > kong-backup.yaml
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
+
       - name: Apply new configuration
-        run: >
-          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }}
-          --konnect-control-plane-name ${{ secrets.CP_NAME }}
-          --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com
-          --tls-skip-verify
+        run: |
+          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
+
       - name: Run API Tests
         id: apiTests
         run: newman run newman/newman_collection.postman_collection.json
+
       - name: Back out changes on failure
         if: always() && steps.apiTests.outcome == 'failure'
-        run: deck gateway sync kong-backup.yaml --konnect-token ${{
-          secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{
-          secrets.CP_NAME }} --konnect-addr=https://eu.api.konghq.com
-          --tls-skip-verify
+        run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
+
   publish-customer-api-to-portal:
     name: Publish OAS to dev portal
     needs: deploy_to_konnect
@@ -87,6 +84,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+
       - name: Fetch environment variables
         id: set_env_vars
         run: |
@@ -94,8 +92,9 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
+
       - name: Check API Product existence or create new
-        run: >
+        run: |
           response=$(curl -s --request GET \
             --url "${{ secrets.ADMIN_API_URL }}/api-products" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
@@ -116,10 +115,10 @@ jobs:
                 "labels": {}
               }'
           fi 
+      
       - name: Get API product ID
-        run: >
+        run: |
           api_product_name="${{ vars.API_PRODUCT_NAME }}"
-
 
           api_product_id=$(curl --request GET \
             --url ${{ secrets.ADMIN_API_URL }}/api-products \
@@ -131,8 +130,8 @@ jobs:
             exit 1
           fi
 
-
           echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
+
       - name: Get Dev Portal ID
         run: |
           dev_portal_id=$(curl --request GET \
@@ -140,6 +139,7 @@ jobs:
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r '.data[].id')
           echo "DEV_PORTAL_ID=$dev_portal_id" >> $GITHUB_ENV
+
       - name: Publish product to the dev portal
         run: |
           echo "API Product ID: $API_PRODUCT_ID"
@@ -151,10 +151,10 @@ jobs:
             --data "{
               \"portal_ids\": [\"$DEV_PORTAL_ID\"]
             }"
-      - name: Create the product version
-        run: >
-          echo "API Product ID: $API_PRODUCT_ID"
 
+      - name: Create the product version
+        run: |
+          echo "API Product ID: $API_PRODUCT_ID"
 
           api_product_version_id=$(curl --request POST \
             --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
@@ -166,42 +166,37 @@ jobs:
               "gateway_service": null
             }'| jq -r '.id')
           echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
+
       - name: Get Control Plane ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: >
+        run: |
           control_plane_name="${{ vars.CONTROL_PLANE_NAME }}"
-
 
           control_plane_id=$(curl --location '${{ secrets.ADMIN_API_URL }}/control-planes' \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
           | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
 
-
           echo "Control_Plane_ID=$control_plane_id" >> $GITHUB_ENV
+
       - name: Get Service ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: >
+        run: |
           echo "Control Plane Id: $Control_Plane_ID"
 
-
           gateway_service_name="${{ vars.GATEWAY_SERVICE_NAME }}"
-
 
           service_id=$(curl --location "${{ secrets.ADMIN_API_URL }}/control-planes/$Control_Plane_ID/core-entities/services" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "Service_ID=$service_id" >> $GITHUB_ENV
+
       - name: Link service to the product version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: >
+        run: |
           echo "API PRODUCT ID: $API_PRODUCT_ID"
-
           echo "Control Plane ID: $Control_Plane_ID"
-
           echo "Service ID: $Service_ID"
-
           echo "API Product Version ID: $API_Product_Version_ID"
-
 
           curl --location --request PATCH "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
@@ -216,17 +211,14 @@ jobs:
                 \"id\": \"$Service_ID\"
               }
             }"
+
       - name: Upload spec for the version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: >
+        run: |
           echo "API PRODUCT ID: $API_PRODUCT_ID"
-
           echo "API Product Version ID: $API_Product_Version_ID"
-
           encoded_spec=$(base64 -w 0 ./kong-config/spec.yaml)
-
           echo $encoded_spec
-
           curl --location --request POST "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID/specifications" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
@@ -234,16 +226,28 @@ jobs:
                     "name": "Spec.yaml",
                     "content": "'"$encoded_spec"'"
                   }'
-        -name: Applying Auth Strategy on Product Version
-         run: |
-           curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            --header 'Content-Type: application/json' \
-            --data '{
-                "application_registration_enabled": true,
-                "auth_strategy_ids": [
-                  "${{ env.Auth_Strategy_ID }}"
-                ],
-                "auto_approve_registration": true
-              }'
- 
+
+      - name: Enabling Auth Strategy
+  if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
+  run: |
+    response=$(curl -s -w "%{http_code}" --location --request PATCH "${{ secrets.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
+      --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+      --header 'Content-Type: application/json' \
+      --data '{
+        "application_registration_enabled": true,
+        "auth_strategy_ids": [
+          "${{ env.Auth_Strategy_I }}"
+        ],
+        "auto_approve_registration": true
+      }')
+
+    if [ "$response" -eq 200 ]; then
+      echo "Success! Auth Strategy enabled."
+    else
+      echo "Failed to enable Auth Strategy. Deleting the API product version..."
+      curl --request DELETE \
+        --url "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
+        --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}'
+      exit 1
+    fi
+
