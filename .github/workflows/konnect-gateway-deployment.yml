@@ -235,11 +235,12 @@ jobs:
             --header 'Content-Type: application/json' \
             --data "{
                \"application_registration_enabled\": true,
-              \"auth_strategy_ids\": [
+               \"auto_approve_registration\": true,
+              \"auth_strategy_ids\": {
                 \"${{ env.Auth_Strategy_ID }}\"
-              ],
-              \"auto_approve_registration\": true
+              }
             }")
+          
           echo "$response"
 
           if [ $response != "200" ]; then
@@ -248,4 +249,3 @@ jobs:
               --url "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
               --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}'
           fi
-
