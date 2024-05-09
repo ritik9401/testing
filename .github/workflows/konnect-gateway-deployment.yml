@@ -234,4 +234,16 @@ jobs:
                     "name": "Spec.yaml",
                     "content": "'"$encoded_spec"'"
                   }'
+        -name: Applying Auth Strategy on Product Version
+         run: |
+           curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data '{
+                "application_registration_enabled": true,
+                "auth_strategy_ids": [
+                  "${{ env.Auth_Strategy_ID }}"
+                ],
+                "auto_approve_registration": true
+              }'
  
