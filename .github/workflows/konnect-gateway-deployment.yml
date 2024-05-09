@@ -230,22 +230,14 @@ jobs:
       - name: Enabling Auth Strategy
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" --location --request PATCH "${{ secrets.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
+          # 
+          curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
-            --data "{
-               \"application_registration_enabled\": true,
-               \"auto_approve_registration\": true,
-              \"auth_strategy_ids\": {
-                \"${{ env.Auth_Strategy_ID }}\"
-              }
-            }")
-          
-          echo "$response"
-
-          if [ $response != "200" ]; then
-            echo "Failed to enable Auth Strategy. Deleting the API product version..."
-            curl --request DELETE \
-              --url "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}'
-          fi
+            --data '{
+                "application_registration_enabled": true,
+                "auth_strategy_ids": [
+                  "${{ env.Auth_Strategy_ID }}"
+                ],
+                "auto_approve_registration": true
+              }'
