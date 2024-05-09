@@ -246,18 +246,18 @@ jobs:
             --data '{
                 "application_registration_enabled": true,
                 "auth_strategy_ids": [
-                  "${{ env.Auth_Strategy_ID }}"
+                  "${{ env.Auth_Strategy_I }}"
                 ],
                 "auto_approve_registration": true
               }'
 
 
       # Add product version deletion on job cancellation
-      - name: Delete API product version on job cancellation
-        if: cancelled() && env.API_PRODUCT_ALREADY_EXISTS == 'true'
+      - name: Delete API product version on error
+        if: ${{ failure() }}
         run: |
           if [ -n "$API_PRODUCT_VERSION_ID" ]; then
             curl --request DELETE \
-              --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/$API_PRODUCT_VERSION_ID" \
+              --url "${{ secrets.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/$API_PRODUCT_VERSION_ID" \
               --header "Authorization: ${{ secrets.KONNECT_TOKEN }}"
           fi
