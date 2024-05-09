@@ -227,11 +227,20 @@ jobs:
                     "content": "'"$encoded_spec"'"
                   }'
 
+      - name: Get Auth Strategy ID
+        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
+        run: |
+          auth_strategy_name="${{ vars.AUTH_STRATEGY_NAME }}"
+
+          auth_strategy_id=$(curl --location "${{ secrets.ADMIN_API_URL }}/application-auth-strategies" \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            | jq -r --arg auth_strategy_name "$auth_strategy_name" '.data[] | select(.name == $auth_strategy_name) | .id')
+          echo "Auth_Strategy_ID=$auth_strategy_id" >> $GITHUB_ENV
+
       - name: Enabling Auth Strategy
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
-          # 
-          curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
+          curl --location --request PATCH "${{ secrets.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data '{
@@ -241,3 +250,5 @@ jobs:
                 ],
                 "auto_approve_registration": true
               }'
+      
+          
