@@ -241,10 +241,10 @@ jobs:
               "auto_approve_registration": true
             }')
 
-          if [ "$response" != "200" ]; then
-            echo "Failed to enable Auth Strategy. Deleting the API product version..."
-            curl --request DELETE \
-              --url "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}'
-          fi
+          # # if [ "$response" != "200" ]; then
+          # #   echo "Failed to enable Auth Strategy. Deleting the API product version..."
+          # #   curl --request DELETE \
+          # #     --url "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
+          # #     --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}'
+          # fi
 
