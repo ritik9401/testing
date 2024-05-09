@@ -226,16 +226,16 @@ jobs:
                     "content": "'"$encoded_spec"'"
                   }'
 
-      - name: Enable Auth Strategy
+      - name: Enabling Auth Strategy
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data '{
-                "application_registration_enabled": false,
+                "application_registration_enabled": true,
                 "auth_strategy_ids": [
                   "7cd596b8-06e8-4113-93ef-5f2941ad26d7"
                 ],
-                "auto_approve_registration": false
+                "auto_approve_registration": true
               }'
