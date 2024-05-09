@@ -88,9 +88,9 @@ jobs:
       - name: Fetch environment variables
         id: set_env_vars
         run: |
-          echo "API_PRODUCT_NAME: ${{ secrets.API_PRODUCT_NAME }}"
-          echo "CONTROL_PLANE_NAME: ${{ secrets.CONTROL_PLANE_NAME }}"
-          echo "GATEWAY_SERVICE_NAME: ${{ secrets.GATEWAY_SERVICE_NAME }}"
+          echo "API_PRODUCT_NAME: ${{ vars.API_PRODUCT_NAME }}"
+          echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
+          echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
 
       - name: Check API Product existence or create new
@@ -99,7 +99,7 @@ jobs:
             --url "${{ secrets.ADMIN_API_URL }}/api-products" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
 
-          if [[ $response == *"${{ secrets.API_PRODUCT_NAME }}"* ]]; then
+          if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
             echo "API product already exists, please change the API product name."
             echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
             exit 1  # Terminate the job since the product already exists
@@ -110,7 +110,7 @@ jobs:
               --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
               --header 'Content-Type: application/json' \
               --data '{
-                "name": "${{ secrets.API_PRODUCT_NAME }}",
+                "name": "${{ vars.API_PRODUCT_NAME }}",
                 "description": "Created through admin API",
                 "labels": {}
               }'
@@ -118,7 +118,7 @@ jobs:
       
       - name: Get API product ID
         run: |
-          api_product_name="${{ secrets.API_PRODUCT_NAME }}"
+          api_product_name="${{ vars.API_PRODUCT_NAME }}"
 
           api_product_id=$(curl --request GET \
             --url ${{ secrets.ADMIN_API_URL }}/api-products \
@@ -170,7 +170,7 @@ jobs:
       - name: Get Control Plane ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
-          control_plane_name="${{ secrets.CONTROL_PLANE_NAME }}"
+          control_plane_name="${{ vars.CONTROL_PLANE_NAME }}"
 
           control_plane_id=$(curl --location '${{ secrets.ADMIN_API_URL }}/control-planes' \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
@@ -183,7 +183,7 @@ jobs:
         run: |
           echo "Control Plane Id: $Control_Plane_ID"
 
-          gateway_service_name="${{ secrets.GATEWAY_SERVICE_NAME }}"
+          gateway_service_name="${{ vars.GATEWAY_SERVICE_NAME }}"
 
           service_id=$(curl --location "${{ secrets.ADMIN_API_URL }}/control-planes/$Control_Plane_ID/core-entities/services" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
@@ -230,7 +230,7 @@ jobs:
       - name: Get Auth Strategy ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
-          auth_strategy_name="${{ secrets.AUTH_STRATEGY_NAME }}"
+          auth_strategy_name="${{ vars.AUTH_STRATEGY_NAME }}"
 
           auth_strategy_id=$(curl --location "${{ secrets.ADMIN_API_URL }}/application-auth-strategies" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
@@ -255,5 +255,5 @@ jobs:
         if: always() && steps.FinalTest.outcome == 'failure'
         run: |
           curl --request DELETE \
-  --url ${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID \
-  --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}'
+            --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}'
