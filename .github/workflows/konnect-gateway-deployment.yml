@@ -260,7 +260,6 @@ jobs:
       #     fi
       - name: Enabling Auth Strategy
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        id: FinalTest
         run: |
           curl --location --request PATCH "${{ secrets.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
