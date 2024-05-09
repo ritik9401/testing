@@ -236,7 +236,7 @@ jobs:
             --data '{
                "application_registration_enabled": true,
               "auth_strategy_ids": [
-                "${{ env.Auth_Strategy_I }}"
+                "${{ env.Auth_Strategy_ID }}"
               ],
               "auto_approve_registration": true
             }')
