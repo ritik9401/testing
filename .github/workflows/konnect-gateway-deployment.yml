@@ -115,7 +115,7 @@ jobs:
                 "labels": {}
               }'
           fi 
-
+      
       - name: Get API product ID
         run: |
           api_product_name="${{ vars.API_PRODUCT_NAME }}"
@@ -250,3 +250,14 @@ jobs:
                 ],
                 "auto_approve_registration": true
               }'
+
+
+      # Add product version deletion on job cancellation
+      - name: Delete API product version on job cancellation
+        if: cancelled() && env.API_PRODUCT_ALREADY_EXISTS == 'true'
+        run: |
+          if [ -n "$API_PRODUCT_VERSION_ID" ]; then
+            curl --request DELETE \
+              --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/$API_PRODUCT_VERSION_ID" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}"
+          fi
