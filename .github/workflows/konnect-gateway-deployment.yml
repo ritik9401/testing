@@ -229,8 +229,8 @@ jobs:
       - name: Enable Auth Strategy
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
-          curl --location --request PATCH 'https://eu.api.konghq.com/v2/portals/19dc92be-5c8a-4a59-b810-4944262ab05d/product-versions/1ec02f05-dcd0-4a3a-a129-90b05f0d074c' \
-            --header 'Authorization: Bearer kpat_5z8NllGuZMgpANpcPsffd4HVgUisKPz800Yv35vGPkIA7xKG7' \
+          curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data '{
                 "application_registration_enabled": false,
