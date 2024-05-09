@@ -227,7 +227,7 @@ jobs:
                     "content": "'"$encoded_spec"'"
                   }'
 
-            - name: Enabling Auth Strategy
+      - name: Enabling Auth Strategy
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" --location --request PATCH "${{ secrets.ADMIN_API_URL }}/portals/$DEV_PORTAL_ID/product-versions/$API_Product_Version_ID" \
