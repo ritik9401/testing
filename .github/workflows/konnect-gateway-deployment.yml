@@ -78,7 +78,7 @@ jobs:
           CP_NAME: ${{ secrets.CP_NAME }}
 
   publish-customer-api-to-portal:
-    name: Publish OAD to dev portal
+    name: Publish OAS to dev portal
     needs: deploy_to_konnect
     runs-on: ubuntu-latest
     steps:
@@ -254,4 +254,6 @@ jobs:
             curl --request DELETE \
               --url "${{ secrets.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_Product_Version_ID }}" \
               --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}"
-          }
+          fi
+      
+          
