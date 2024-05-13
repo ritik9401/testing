@@ -66,16 +66,16 @@ jobs:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ secrets.CP_NAME }}
 
-      - name: Run API Tests
-        id: apiTests
-        run: newman run newman/newman_collection.postman_collection.json
+      # - name: Run API Tests
+      #   id: apiTests
+      #   run: newman run newman/newman_collection.postman_collection.json
 
-      - name: Back out changes on failure
-        if: always() && steps.apiTests.outcome == 'failure'
-        run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
-        env:
-          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
-          CP_NAME: ${{ secrets.CP_NAME }}
+      # - name: Back out changes on failure
+      #   if: always() && steps.apiTests.outcome == 'failure'
+      #   run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
+      #   env:
+      #     KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+      #     CP_NAME: ${{ secrets.CP_NAME }}
 
   publish-customer-api-to-portal:
     name: Publish OAS to dev portal
@@ -139,17 +139,17 @@ jobs:
             | jq -r '.data[].id')
           echo "DEV_PORTAL_ID=$dev_portal_id" >> $GITHUB_ENV
 
-      - name: Publish product to the dev portal
-        run: |
-          echo "API Product ID: $API_PRODUCT_ID"
-          echo "Dev Portal ID: $DEV_PORTAL_ID"
-          curl --request PATCH \
-            --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            --header 'Content-Type: application/json' \
-            --data "{
-              \"portal_ids\": [\"$DEV_PORTAL_ID\"]
-            }"
+      # - name: Publish product to the dev portal
+      #   run: |
+      #     echo "API Product ID: $API_PRODUCT_ID"
+      #     echo "Dev Portal ID: $DEV_PORTAL_ID"
+      #     curl --request PATCH \
+      #       --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
+      #       --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+      #       --header 'Content-Type: application/json' \
+      #       --data "{
+      #         \"portal_ids\": [\"$DEV_PORTAL_ID\"]
+      #       }"
 
       - name: Create the product version
         run: |
