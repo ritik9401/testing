@@ -93,27 +93,27 @@ jobs:
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
 
-      - name: Check API Product existence or create new
-        run: |
-          response=$(curl -s --request GET \
-            --url "${{ secrets.ADMIN_API_URL }}/api-products" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
+      # - name: Check API Product existence or create new
+      #   run: |
+      #     response=$(curl -s --request GET \
+      #       --url "${{ secrets.ADMIN_API_URL }}/api-products" \
+      #       --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
 
-          if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
-            echo "API product already exists, please change the API product name."
-            echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "API product doesn't exist, creating..."
-            curl --request POST \
-              --url ${{ secrets.ADMIN_API_URL }}/api-products \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "name": "${{ vars.API_PRODUCT_NAME }}",
-                "description": "Created through admin API",
-                "labels": {}
-              }'
-          fi 
+      #     if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
+      #       echo "API product already exists, please change the API product name."
+      #       echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
+      #     else
+      #       echo "API product doesn't exist, creating..."
+      #       curl --request POST \
+      #         --url ${{ secrets.ADMIN_API_URL }}/api-products \
+      #         --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+      #         --header 'Content-Type: application/json' \
+      #         --data '{
+      #           "name": "${{ vars.API_PRODUCT_NAME }}",
+      #           "description": "Created through admin API",
+      #           "labels": {}
+      #         }'
+      #     fi 
 
       - name: Get API product ID
         run: |
