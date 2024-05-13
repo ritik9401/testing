@@ -26,13 +26,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://3.91.218.179:8000/hello?apikey=test-key",
+					"raw": "http://13.201.3.134:8000/hello?apikey=test-key",
 					"protocol": "http",
 					"host": [
+						"13",
+						"201",
 						"3",
-						"91",
-						"218",
-						"179"
+						"134"
 					],
 					"port": "8000",
 					"path": [
@@ -53,13 +53,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://3.91.218.179:8000/hello?apikey=test-key",
+							"raw": "http://13.201.3.134:8000/hello?apikey=test-key",
 							"protocol": "http",
 							"host": [
+								"13",
+								"201",
 								"3",
-								"91",
-								"218",
-								"179"
+								"134"
 							],
 							"port": "8000",
 							"path": [
@@ -183,13 +183,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://3.91.218.179:8000/hello?apikey=abc",
+					"raw": "http://13.201.3.134:8000/hello?apikey=abc",
 					"protocol": "http",
 					"host": [
+						"13",
+						"201",
 						"3",
-						"91",
-						"218",
-						"179"
+						"134"
 					],
 					"port": "8000",
 					"path": [
