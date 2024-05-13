@@ -102,7 +102,6 @@ jobs:
           if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
             echo "API product already exists, please change the API product name."
             echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
-            exit 1  # Terminate the job since the product already exists
           else
             echo "API product doesn't exist, creating..."
             curl --request POST \
@@ -189,32 +188,6 @@ jobs:
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "Service_ID=$service_id" >> $GITHUB_ENV
-
-      - name: Fetch Product Version ID using Service ID
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: |
-          service_id="${{ env.Service_ID }}"
-
-          response=$(curl --request GET \
-            --url "${{ secrets.ADMIN_API_URL }}/api-products" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}')
-
-          product_version_id=$(echo "$response" | jq -r --arg service_id "$service_id" '.data[] | select(.gateway_service.id == $service_id) | .id // empty')
-
-          echo "API_PRODUCT_VERSION_ID=$product_version_id" >> $GITHUB_ENV
-
-          # Check if product_version_id is empty (not linked) and set a flag in the environment
-          if [ -z "$product_version_id" ]; then
-            echo "SERVICE_NOT_LINKED=true" >> $GITHUB_ENV
-          else
-            echo "Unlinking service from product version..."
-            curl --location --request PATCH "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$product_version_id" \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "gateway_service": null
-              }'
-          fi
 
       - name: Link service to the product version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false' && env.SERVICE_NOT_LINKED != 'true'
