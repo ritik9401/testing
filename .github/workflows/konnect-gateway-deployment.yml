@@ -80,7 +80,7 @@ jobs:
   publish-customer-api-to-portal:
     name: Publish OAD to dev portal
     needs: deploy_to_konnect
-    runs-on: ubuntu-latest
+    uns-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -201,12 +201,7 @@ jobs:
 
           product_version_id=$(echo "$response" | jq -r --arg service_id "$service_id" '.data[] | select(.gateway_service.id == $service_id) | .id // empty')
 
-          if [ -z "$product_version_id" ]; then
-            echo "Error: Product Version ID not found for the given service ID."
-            exit 1
-          fi
-
-          echo "API_Product_Version_ID=$product_version_id" >> $GITHUB_ENV
+          echo "API_PRODUCT_VERSION_ID=$product_version_id" >> $GITHUB_ENV
 
           # Check if product_version_id is empty (not linked) and set a flag in the environment
           if [ -z "$product_version_id" ]; then
