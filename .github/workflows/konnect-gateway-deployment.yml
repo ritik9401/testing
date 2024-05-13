@@ -176,7 +176,8 @@ jobs:
           service_id="${{ env.Service_ID }}"
 
           response=$(curl --request GET \
-            --url "${{ secrets.ADMIN_API_URL }}/api-products" \
+            --url "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
+            --header 'accept: application/json' \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}')
 
           product_version_id=$(echo "$response" | jq -r --arg service_id "$service_id" '.data[] | select(.gateway_service.id == $service_id) | .id // empty')
