@@ -246,7 +246,6 @@ jobs:
             }"
 
 
-
       - name: Upload spec for the version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
@@ -286,7 +285,7 @@ jobs:
             "auto_approve_registration": true
           }')
           if [ $response != "200" ]; then
-            echo "Failed to enable Auth Strategy. Deleting the API product version..."
+            echo "Failed to enable Auth Strategy. Deleting the API product version.."
             curl --request DELETE \
               --url "${{ secrets.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_Product_Version_ID }}" \
               --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}"
