@@ -77,7 +77,7 @@ jobs:
       #     KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
       #     CP_NAME: ${{ secrets.CP_NAME }}
 
-  publish-customer-api-to-portal:
+   publish-customer-api-to-portal:
     name: Publish OAS to dev portal
     needs: deploy_to_konnect
     runs-on: ubuntu-latest
@@ -187,8 +187,7 @@ jobs:
           service_id="${{ env.Service_ID }}"
 
           response=$(curl --request GET \
-            --url "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
-            --header 'Content-Type: application/json' \
+            --url "${{ secrets.ADMIN_API_URL }}/api-products" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}')
 
           product_version_id=$(echo "$response" | jq -r --arg service_id "$service_id" '.data[] | select(.gateway_service.id == $service_id) | .id // empty')
@@ -229,7 +228,7 @@ jobs:
                 \"id\": \"$Service_ID\"
               }
             }"
-            
+
       - name: Upload spec for the version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
@@ -273,5 +272,4 @@ jobs:
             curl --request DELETE \
               --url "${{ secrets.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_Product_Version_ID }}" \
               --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}"
-          fi
-      
+          }
