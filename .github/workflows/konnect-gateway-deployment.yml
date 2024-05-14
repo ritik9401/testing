@@ -203,3 +203,44 @@ jobs:
                 \"id\": \"$Service_ID\"
               }
             }"
+      - name: Upload spec for the version
+        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
+        run: |
+          echo "API PRODUCT ID: $API_PRODUCT_ID"
+          echo "API Product Version ID: $API_Product_Version_ID"
+          encoded_spec=$(base64 -w 0 ./kong-config/spec.yaml)
+          echo $encoded_spec
+          curl --location --request POST "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID/specifications" \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data '{
+                    "name": "Spec.yaml",
+                    "content": "'"$encoded_spec"'"
+                  }'
+      - name: Get Auth Strategy ID
+        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
+        run: |
+          auth_strategy_name="${{ vars.AUTH_STRATEGY_NAME }}"
+          auth_strategy_id=$(curl --location "${{ secrets.ADMIN_API_URL }}/application-auth-strategies" \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            | jq -r --arg auth_strategy_name "$auth_strategy_name" '.data[] | select(.name == $auth_strategy_name) | .id')
+          echo "Auth_Strategy_ID=$auth_strategy_id" >> $GITHUB_ENV
+      - name: Enabling Auth Strategy
+        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" --location --request PATCH "${{ secrets.ADMIN_API_URL }}/portals/${{ env.DEV_PORTAL_ID }}/product-versions/${{ env.API_Product_Version_ID }}" \
+          --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+          --header 'Content-Type: application/json' \
+          --data '{
+            "application_registration_enabled": true,
+            "auth_strategy_ids": [
+              "${{ env.Auth_Strategy_ID }}"
+            ],
+            "auto_approve_registration": true
+          }')
+          if [ $response != "200" ]; then
+            echo "Failed to enable Auth Strategy. Deleting the API product version..."
+            curl --request DELETE \
+              --url "${{ secrets.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_Product_Version_ID }}" \
+              --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}"
+          fi
