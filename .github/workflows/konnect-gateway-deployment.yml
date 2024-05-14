@@ -95,20 +95,20 @@ jobs:
 
       - name: Get API product ID
         run: |
-          api_product_name="${{ secrets.API_PRODUCT_NAME }}"
+          api_product_name="${{ vars.API_PRODUCT_NAME }}"
 
           api_product_id=$(curl --request GET \
             --url ${{ secrets.ADMIN_API_URL }}/api-products \
-            --header 'Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}' \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
 
-          if [ -z "$api_product_id" ]; then
+          if [ "$api_product_id" = "empty" ]; then
             echo "Error: API Product ID not found."
             exit 1
           fi
 
           echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
-
+          
       - name: Get Dev Portal ID
         run: |
           dev_portal_id=$(curl --request GET \
