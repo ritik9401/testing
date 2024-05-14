@@ -31,14 +31,12 @@ jobs:
           tar -xf deck.tar.gz -C /tmp
           sudo cp /tmp/deck /usr/local/bin/
           deck version
-
       - name: Lint OAS spec using Spectral
         run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
       - name: Generate new gateway configuration
         run: |
           deck file openapi2kong --spec ./kong-config/spec.yaml --select-tag=hello,dev --output-file kong.yaml
-
       - name: Add Global plugins
         run: cat kong.yaml | deck file add-plugins ./kong-config/global-plugin.yaml -o kong.yaml
 
@@ -92,66 +90,40 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
-      - name: Check if API product exists
+      # - name: Check API Product existence or create new
+      #   run: |
+      #     response=$(curl -s --request GET \
+      #       --url "${{ secrets.ADMIN_API_URL }}/api-products" \
+      #       --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
+
+      #     if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
+      #       echo "API product already exists, please change the API product name."
+      #       echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
+      #     else
+      #       echo "API product doesn't exist, creating..."
+      #       curl --request POST \
+      #         --url ${{ secrets.ADMIN_API_URL }}/api-products \
+      #         --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+      #         --header 'Content-Type: application/json' \
+      #         --data '{
+      #           "name": "${{ vars.API_PRODUCT_NAME }}",
+      #           "description": "Created through admin API",
+      #           "labels": {}
+      #         }'
+      #     fi 
+
+      - name: Get API product ID
         run: |
           api_product_name="${{ vars.API_PRODUCT_NAME }}"
-
-          response=$(curl -s --request GET \
-            --url "${{ secrets.ADMIN_API_URL }}/api-products" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
-
-          if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
-            echo "API product already exists, getting its ID..."
-            api_product_id=$(echo "$response" | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
-            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
-            API_PRODUCT_ALREADY_EXISTS=true
-          else
-            echo "API product doesn't exist, creating..."
-            API_PRODUCT_ALREADY_EXISTS=false
+          api_product_id=$(curl --request GET \
+            --url ${{ secrets.ADMIN_API_URL }}/api-products \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
+          if [ "$api_product_id" = "empty" ]; then
+            echo "Error: API Product ID not found."
+            exit 1
           fi
-          echo "API_PRODUCT_ALREADY_EXISTS=$API_PRODUCT_ALREADY_EXISTS" >> $GITHUB_ENV
-
-      - name: Create the product version
-        run: |
-          echo "API Product ID: $API_PRODUCT_ID"
-
-          if [ "$API_PRODUCT_ALREADY_EXISTS" = "true" ]; then
-            echo "API Product already exists, creating a new product version..."
-            api_product_version_id=$(curl --request POST \
-              --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "name": "v1",
-                "publish_status": "published",
-                "gateway_service": null
-              }'| jq -r '.id')
-            echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
-          else
-            api_product_id=$(curl --request POST \
-              --url ${{ secrets.ADMIN_API_URL }}/api-products \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "name": "${{ vars.API_PRODUCT_NAME }}",
-                "description": "Created through admin API",
-                "labels": {}
-              }' | jq -r '.id')
-            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
-
-            api_product_version_id=$(curl --request POST \
-              --url ${{ secrets.ADMIN_API_URL }}/api-products/$api_product_id/product-versions \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "name": "v1",
-                "publish_status": "published",
-                "gateway_service": null
-              }'| jq -r '.id')
-            echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
-          fi
-      
-
+          echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
       - name: Get Dev Portal ID
         run: |
           dev_portal_id=$(curl --request GET \
@@ -159,70 +131,48 @@ jobs:
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r '.data[].id')
           echo "DEV_PORTAL_ID=$dev_portal_id" >> $GITHUB_ENV
+      # - name: Publish product to the dev portal
+      #   run: |
+      #     echo "API Product ID: $API_PRODUCT_ID"
+      #     echo "Dev Portal ID: $DEV_PORTAL_ID"
+      #     curl --request PATCH \
+      #       --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
+      #       --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+      #       --header 'Content-Type: application/json' \
+      #       --data "{
+      #         \"portal_ids\": [\"$DEV_PORTAL_ID\"]
+      #       }"
 
-      - name: Publish product to the dev portal
+      - name: Create the product version
         run: |
           echo "API Product ID: $API_PRODUCT_ID"
-          echo "Dev Portal ID: $DEV_PORTAL_ID"
-          curl --request PATCH \
-            --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
+          api_product_version_id=$(curl --request POST \
+            --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
-            --data "{
-              \"portal_ids\": [\"$DEV_PORTAL_ID\"]
-            }"
-
-
+            --data '{
+              "name": "v1",
+              "publish_status": "published",
+              "gateway_service": null
+            }'| jq -r '.id')
+          echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
       - name: Get Control Plane ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           control_plane_name="${{ vars.CONTROL_PLANE_NAME }}"
-
           control_plane_id=$(curl --location '${{ secrets.ADMIN_API_URL }}/control-planes' \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
           | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
-
           echo "Control_Plane_ID=$control_plane_id" >> $GITHUB_ENV
-
       - name: Get Service ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           echo "Control Plane Id: $Control_Plane_ID"
-
           gateway_service_name="${{ vars.GATEWAY_SERVICE_NAME }}"
-
           service_id=$(curl --location "${{ secrets.ADMIN_API_URL }}/control-planes/$Control_Plane_ID/core-entities/services" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "Service_ID=$service_id" >> $GITHUB_ENV
-
-      - name: Fetch Product Version ID using Service ID
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
-        run: |
-          service_id="${{ env.Service_ID }}"
-
-          response=$(curl --request GET \
-            --url "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
-            --header 'Content-Type: application/json' \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}')
-
-          product_version_id=$(echo "$response" | jq -r --arg service_id "$service_id" '.data[] | select(.gateway_service.id == $service_id) | .id // empty')
-
-          echo "API_PRODUCT_VERSION_ID=$product_version_id" >> $GITHUB_ENV
-
-          # Check if product_version_id is empty (not linked) and set a flag in the environment
-          if [ -z "$product_version_id" ]; then
-            echo "SERVICE_NOT_LINKED=true" >> $GITHUB_ENV
-          else
-            echo "Unlinking service from product version..."
-            curl --location --request PATCH "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$product_version_id" \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "gateway_service": null
-              }'
-          fi
-
       - name: Link service to the product version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false' && env.SERVICE_NOT_LINKED != 'true'
         run: |
@@ -230,7 +180,6 @@ jobs:
           echo "Control Plane ID: $Control_Plane_ID"
           echo "Service ID: $Service_ID"
           echo "API Product Version ID: $API_Product_Version_ID"
-
           curl --location --request PATCH "${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_Product_Version_ID" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
@@ -244,8 +193,6 @@ jobs:
                 \"id\": \"$Service_ID\"
               }
             }"
-
-
       - name: Upload spec for the version
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
@@ -260,17 +207,14 @@ jobs:
                     "name": "Spec.yaml",
                     "content": "'"$encoded_spec"'"
                   }'
-
       - name: Get Auth Strategy ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           auth_strategy_name="${{ vars.AUTH_STRATEGY_NAME }}"
-
           auth_strategy_id=$(curl --location "${{ secrets.ADMIN_API_URL }}/application-auth-strategies" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg auth_strategy_name "$auth_strategy_name" '.data[] | select(.name == $auth_strategy_name) | .id')
           echo "Auth_Strategy_ID=$auth_strategy_id" >> $GITHUB_ENV
-
       - name: Enabling Auth Strategy
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
@@ -285,10 +229,9 @@ jobs:
             "auto_approve_registration": true
           }')
           if [ $response != "200" ]; then
-            echo "Failed to enable Auth Strategy. Deleting the API product version.."
+            echo "Failed to enable Auth Strategy. Deleting the API product version..."
             curl --request DELETE \
               --url "${{ secrets.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_Product_Version_ID }}" \
               --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}"
           fi
       
-          
