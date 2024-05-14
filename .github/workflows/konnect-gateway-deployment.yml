@@ -2,7 +2,7 @@ name: konnect-gateway-deployment
 
 on:
   push:
-    branches:
+    branches: 
       - "main"
   workflow_dispatch:
 
@@ -11,15 +11,139 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploying Kong Configuration
     steps:
-      # Steps for deploying Kong configuration
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Install Deck
+        run: |
+          curl -sL https://github.com/kong/deck/releases/download/v1.34.0/deck_1.34.0_linux_amd64.tar.gz -o deck.tar.gz
+          tar -xf deck.tar.gz -C /tmp
+          sudo cp /tmp/deck /usr/local/bin/
+          deck version
+      - name: Lint OAS spec using Spectral
+        run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+
+      - name: Generate new gateway configuration
+        run: |
+          deck file openapi2kong --spec ./kong-config/spec.yaml --select-tag=hello,dev --output-file kong.yaml
+      - name: Add Global plugins
+        run: cat kong.yaml | deck file add-plugins ./kong-config/global-plugin.yaml -o kong.yaml
+
+      - name: Add Route plugins
+        run: cat kong.yaml | deck file add-plugins ./kong-config/route-level-plugin.yaml -o kong.yaml
+
+      - name: Add Service plugins
+        run: cat kong.yaml | deck file add-plugins ./kong-config/service-level-plugin.yaml -o kong.yaml
+
+      - name: Ping to Konnect Org
+        run: deck gateway ping --konnect-token ${{ secrets.KONNECT_TOKEN }}
+        env:
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+
+      - name: Backup existing configuration
+        run: deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify > kong-backup.yaml
+        env:
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+          CP_NAME: ${{ secrets.CP_NAME }}
+
+      - name: Apply new configuration
+        run: |
+          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ secrets.CP_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
+        env:
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+          CP_NAME: ${{ secrets.CP_NAME }}
 
   publish-customer-api-to-portal:
     name: Publish OAS to dev portal
     needs: deploy_to_konnect
     runs-on: ubuntu-latest
     steps:
-      # Steps for publishing OAS to the dev portal
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
+      - name: Fetch environment variables
+        id: set_env_vars
+        run: |
+          echo "API_PRODUCT_NAME: ${{ vars.API_PRODUCT_NAME }}"
+          echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
+          echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
+          echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
+      - name: Get API product ID
+        run: |
+          api_product_name="${{ vars.API_PRODUCT_NAME }}"
+          api_product_id=$(curl --request GET \
+            --url ${{ secrets.ADMIN_API_URL }}/api-products \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
+          if [ "$api_product_id" = "empty" ]; then
+            echo "Error: API Product ID not found."
+            exit 1
+          fi
+          echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
+      - name: Get Dev Portal ID
+        run: |
+          dev_portal_id=$(curl --request GET \
+            --url ${{ secrets.ADMIN_API_URL }}/portals \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            | jq -r '.data[].id')
+          echo "DEV_PORTAL_ID=$dev_portal_id" >> $GITHUB_ENV
+      - name: Publish product to the dev portal
+        run: |
+          echo "API Product ID: $API_PRODUCT_ID"
+          echo "Dev Portal ID: $DEV_PORTAL_ID"
+          curl --request PATCH \
+            --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            --header 'Content-Type: application/json' \
+            --data "{
+              \"portal_ids\": [\"$DEV_PORTAL_ID\"]
+            }"
+      - name: Create the product version
+        run: |
+          echo "API Product ID: $API_PRODUCT_ID"
+          if [ "$API_PRODUCT_ALREADY_EXISTS" = "true" ]; then
+            echo "API Product already exists, creating a new product version..."
+            api_product_version_id=$(curl --request POST \
+              --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "v1",
+                "publish_status": "published",
+                "gateway_service": null
+              }'| jq -r '.id')
+            echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
+          else
+            api_product_version_id=$(curl --request POST \
+              --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "v1",
+                "publish_status": "published",
+                "gateway_service": null
+              }'| jq -r '.id')
+            echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
+          fi
+      - name: Get Control Plane ID
+        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
+        run: |
+          control_plane_name="${{ vars.CONTROL_PLANE_NAME }}"
+          control_plane_id=$(curl --location '${{ secrets.ADMIN_API_URL }}/control-planes' \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+          | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
+          echo "Control_Plane_ID=$control_plane_id" >> $GITHUB_ENV
       - name: Get Service ID
         if: ${{ needs.deploy_to_konnect.outputs.SERVICE_NOT_LINKED != 'true' }}
         run: |
