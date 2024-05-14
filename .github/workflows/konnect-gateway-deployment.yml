@@ -108,7 +108,7 @@ jobs:
           fi
 
           echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
-          
+
       - name: Get Dev Portal ID
         run: |
           dev_portal_id=$(curl --request GET \
@@ -174,13 +174,13 @@ jobs:
         run: |
           echo "Control Plane Id: $Control_Plane_ID"
 
-          gateway_service_name="${{ secrets.GATEWAY_SERVICE_NAME }}"
+          gateway_service_name="${{ vars.GATEWAY_SERVICE_NAME }}"
 
           service_id=$(curl --location "${{ secrets.ADMIN_API_URL }}/control-planes/$Control_Plane_ID/core-entities/services" \
-            --header 'Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}' \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "Service_ID=$service_id" >> $GITHUB_ENV
-
+          
       - name: Fetch Product Version ID using Service ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
