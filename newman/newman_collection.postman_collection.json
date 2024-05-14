@@ -53,7 +53,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://3.91.218.179:8000/hello?apikey=abc",
+							"raw": "http://43.205.230.126:8000/hello?apikey=abc",
 							"protocol": "http",
 							"host": [
 								"3",
