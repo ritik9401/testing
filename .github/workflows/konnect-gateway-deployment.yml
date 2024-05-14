@@ -2,7 +2,7 @@ name: konnect-gateway-deployment
 
 on:
   push:
-    branches: 
+    branches:
       - "main"
   workflow_dispatch:
 
@@ -92,6 +92,29 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
+
+      - name: Check API Product existence or create new
+        run: |
+          response=$(curl -s --request GET \
+            --url "${{ secrets.ADMIN_API_URL }}/api-products" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
+
+          if [[ $response == *"${{ vars.API_PRODUCT_NAME }}"* ]]; then
+            echo "API product already exists, creating a new product version..."
+            API_PRODUCT_ALREADY_EXISTS=true
+            echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "API product doesn't exist, creating..."
+            curl --request POST \
+              --url ${{ secrets.ADMIN_API_URL }}/api-products \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "${{ vars.API_PRODUCT_NAME }}",
+                "description": "Created through admin API",
+                "labels": {}
+              }'
+          fi 
 
       - name: Get API product ID
         run: |
@@ -274,4 +297,3 @@ jobs:
               --url "${{ secrets.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_Product_Version_ID }}" \
               --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}"
           fi
-      
