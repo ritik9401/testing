@@ -26,13 +26,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://13.201.3.134:8000/hello?apikey=abc",
+					"raw": "http://43.205.230.126:8000/hello?apikey=abc",
 					"protocol": "http",
 					"host": [
-						"13",
-						"201",
-						"3",
-						"134"
+						"43",
+						"205",
+						"230",
+						"126"
 					],
 					"port": "8000",
 					"path": [
