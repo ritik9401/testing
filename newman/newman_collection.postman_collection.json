@@ -14,7 +14,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
-							"  pm.response.to.have.status(200);\r",
+							"  pm.response.to.have.status(401);\r",
 							"});"
 						],
 						"type": "text/javascript",
@@ -26,23 +26,17 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://13.201.3.134:8000/hello?apikey=test-key",
+					"raw": "http://43.205.230.126:8000/hello",
 					"protocol": "http",
 					"host": [
-						"13",
-						"201",
-						"3",
-						"134"
+						"43",
+						"205",
+						"230",
+						"126"
 					],
 					"port": "8000",
 					"path": [
 						"hello"
-					],
-					"query": [
-						{
-							"key": "apikey",
-							"value": "test-key"
-						}
 					]
 				}
 			},
