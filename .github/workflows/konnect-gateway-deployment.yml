@@ -79,18 +79,32 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
-      - name: Get API product ID
+
+      - name: Get API product ID or create new product
+        id: get_product_id
         run: |
           api_product_name="${{ vars.API_PRODUCT_NAME }}"
           api_product_id=$(curl --request GET \
             --url ${{ secrets.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
-          if [ "$api_product_id" = "empty" ]; then
-            echo "Error: API Product ID not found."
-            exit 1
+          
+          if [ -z "$api_product_id" ]; then
+            echo "API product not found, creating a new product..."
+            api_product_id=$(curl --request POST \
+              --url ${{ secrets.ADMIN_API_URL }}/api-products \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "'"$api_product_name"'",
+                "description": "New API product"
+              }'| jq -r '.id')
+
+            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
+          else
+            echo "API product already exists, fetching product ID..."
+            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
           fi
-          echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
       - name: Get Dev Portal ID
         run: |
           dev_portal_id=$(curl --request GET \
@@ -109,13 +123,12 @@ jobs:
             --data "{
               \"portal_ids\": [\"$DEV_PORTAL_ID\"]
             }"
-      - name: Create the product version
+      - name: Create version if old product exists or create version of new product
         run: |
-          echo "API Product ID: $API_PRODUCT_ID"
-          if [ "$API_PRODUCT_ALREADY_EXISTS" = "true" ]; then
-            echo "API Product already exists, creating a new product version..."
+          if [ -n "${{ steps.get_product_id.outputs.API_PRODUCT_ID }}" ]; then
+            echo "API_PRODUCT_ID: ${{ steps.get_product_id.outputs.API_PRODUCT_ID }}"
             api_product_version_id=$(curl --request POST \
-              --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
+              --url ${{ secrets.ADMIN_API_URL }}/api-products/${{ steps.get_product_id.outputs.API_PRODUCT_ID }}/product-versions \
               --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
               --header 'Content-Type: application/json' \
               --data '{
@@ -123,8 +136,10 @@ jobs:
                 "publish_status": "published",
                 "gateway_service": null
               }'| jq -r '.id')
+
             echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
           else
+            echo "Creating a new version of the newly created product..."
             api_product_version_id=$(curl --request POST \
               --url ${{ secrets.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
               --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
@@ -134,8 +149,10 @@ jobs:
                 "publish_status": "published",
                 "gateway_service": null
               }'| jq -r '.id')
+
             echo "API_Product_Version_ID=$api_product_version_id" >> $GITHUB_ENV
           fi
+
       - name: Get Control Plane ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
