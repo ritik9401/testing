@@ -64,6 +64,9 @@ jobs:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CP_NAME: ${{ vars.CONTROL_PLANE_NAME }}
 
+      - name: Wait for a few seconds
+        run: sleep 10
+
       - name: Run API Tests
         id: apiTests
         run: newman run newman/newman_collection.postman_collection.json
