@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bee68afd-dead-4ceb-90a1-89bc26c7a950",
+		"_postman_id": "abb4bd1d-0287-41e2-9b60-bb715ee47bce",
 		"name": "New Collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "31918775"
@@ -26,13 +26,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://43.205.230.126:8000/hello?apikey=test-key",
+					"raw": "http://13.201.3.134:8000/hello?apikey=test-key",
 					"protocol": "http",
 					"host": [
-						"43",
-						"205",
-						"230",
-						"126"
+						"13",
+						"201",
+						"3",
+						"134"
 					],
 					"port": "8000",
 					"path": [
@@ -183,13 +183,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://43.205.230.126:8000/hello?apikey=abc",
+					"raw": "http://13.201.3.134:8000/hello?apikey=abc",
 					"protocol": "http",
 					"host": [
-						"43",
-						"205",
-						"230",
-						"126"
+						"13",
+						"201",
+						"3",
+						"134"
 					],
 					"port": "8000",
 					"path": [
