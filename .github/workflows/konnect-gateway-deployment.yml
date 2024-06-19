@@ -99,7 +99,7 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
-          API_PRODUCT_NAME=$(yq e '.info.title' ./kong-config/$SPEC_FILE | sed 's/ /-/g')
+          API_PRODUCT_NAME=$(yq e '.info.title' ./kong-config/$SPEC_FILE)
           if [ -z "$API_PRODUCT_NAME" ]; then
             echo "API_PRODUCT_NAME=default-api-product" >> $GITHUB_ENV
           else
