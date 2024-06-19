@@ -110,7 +110,7 @@ jobs:
       - name: Get API product ID or create new product
         id: get_product_id
         run: |
-          api_product_name="${{API_PRODUCT_NAME }}"
+          api_product_name="${API_PRODUCT_NAME }"
           api_product_id=$(curl --request GET \
             --url ${{ vars.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
