@@ -99,7 +99,12 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
-          echo "API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')" >> $GITHUB_ENV
+          API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
+          if [ -z "$API_PRODUCT_NAME" ]; then
+            echo "API_PRODUCT_NAME=default-api-product" >> $GITHUB_ENV
+          else
+            echo "API_PRODUCT_NAME=$API_PRODUCT_NAME" >> $GITHUB_ENV
+          fi
 
       - name: Create API product
         id: create_product
@@ -127,7 +132,6 @@ jobs:
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
             echo "Created API product with ID: $api_product_id"
           fi
-
       #   run: |
       #     dev_portal_id=$(curl --request GET \
       #       --url ${{ vars.ADMIN_API_URL }}/portals \
