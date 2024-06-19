@@ -107,31 +107,25 @@ jobs:
           # echo "GW_SERVICE_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
           # echo "CONTROL_PLANE_NAME=integration1-${{ github.event.inputs.environment }}-cp" >> $GITHUB_ENV
 
-      - name: Get API product ID or create new product
-        id: get_product_id
+      - name: Create API product
+        id: create_product
         run: |
           api_product_name="${API_PRODUCT_NAME}"
-          api_product_id=$(curl --request GET \
+          echo "Creating a new API product..."
+          
+          api_product_id=$(curl --request POST \
             --url ${{ vars.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r --arg api_product_name "$api_product_name" '.data[] | select(.name == $api_product_name) | .id // empty')
-          
-          if [ -z "$api_product_id" ]; then
-            echo "API product not found, creating a new product..."
-            api_product_id=$(curl --request POST \
-              --url ${{ vars.ADMIN_API_URL }}/api-products \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "name": "'"$api_product_name"'",
-                "description": "New API product"
-              }'| jq -r '.id')
-
-            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
-          else
-            echo "API product already exists, fetching product ID..."
-            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
-          fi
+            --header 'Content-Type: application/json' \
+            --data '{
+              "name": "'"$api_product_name"'",
+              "description": "New API product"
+            }' | jq -r '.id')
+      
+          echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
+          echo "Created API product with ID: $api_product_id"
+      
+                fi
       # - name: Get Dev Portal ID
       #   run: |
       #     dev_portal_id=$(curl --request GET \
