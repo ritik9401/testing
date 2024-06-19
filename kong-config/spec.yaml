@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Sample API
+  title: Trades (on and off exchange)
   version: 1.0.0
   description: This is a sample API description.
   contact:
