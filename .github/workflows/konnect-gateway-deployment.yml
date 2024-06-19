@@ -86,33 +86,27 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+
       - name: Fetch spec file
         run: |
           cd ./kong-config
           SPEC_FILE=$(ls -p | grep -v / | grep "^spec.yaml$")
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
 
-
-
       - name: Fetch environment variables
         id: set_env_vars
         run: |
-          # echo "API_PRODUCT_NAME: ${{ vars.API_PRODUCT_NAME }}"
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
           echo "API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')" >> $GITHUB_ENV
-          # echo "API_PRODUCT_DESCRIPTION=$(yq e '.info.description' $SPEC_FILE)" >> $GITHUB_ENV
-          # echo "API_PRODUCT_VERSION=$(yq e '.info.version' $SPEC_FILE)" >> $GITHUB_ENV          
-          # echo "GW_SERVICE_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-          # echo "CONTROL_PLANE_NAME=integration1-${{ github.event.inputs.environment }}-cp" >> $GITHUB_ENV
 
       - name: Create API product
         id: create_product
         run: |
           api_product_name="${API_PRODUCT_NAME}"
           echo "Creating a new API product..."
-          
+
           response=$(curl --request POST \
             --url ${{ vars.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
@@ -121,11 +115,11 @@ jobs:
               "name": "'"$api_product_name"'",
               "description": "New API product"
             }')
-      
+
           echo "API response: $response"
-      
+
           api_product_id=$(echo "$response" | jq -r '.id')
-      
+
           if [ "$api_product_id" == "null" ] || [ -z "$api_product_id" ]; then
             echo "Failed to create API product. Response: $response"
             exit 1
