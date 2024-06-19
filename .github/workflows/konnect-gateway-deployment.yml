@@ -113,20 +113,27 @@ jobs:
           api_product_name="${API_PRODUCT_NAME}"
           echo "Creating a new API product..."
           
-          api_product_id=$(curl --request POST \
+          response=$(curl --request POST \
             --url ${{ vars.ADMIN_API_URL }}/api-products \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data '{
               "name": "'"$api_product_name"'",
               "description": "New API product"
-            }' | jq -r '.id')
+            }')
       
-          echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
-          echo "Created API product with ID: $api_product_id"
+          echo "API response: $response"
       
-                fi
-      # - name: Get Dev Portal ID
+          api_product_id=$(echo "$response" | jq -r '.id')
+      
+          if [ "$api_product_id" == "null" ] || [ -z "$api_product_id" ]; then
+            echo "Failed to create API product. Response: $response"
+            exit 1
+          else
+            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
+            echo "Created API product with ID: $api_product_id"
+          fi
+
       #   run: |
       #     dev_portal_id=$(curl --request GET \
       #       --url ${{ vars.ADMIN_API_URL }}/portals \
