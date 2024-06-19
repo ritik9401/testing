@@ -99,7 +99,7 @@ jobs:
           echo "CONTROL_PLANE_NAME: ${{ vars.CONTROL_PLANE_NAME }}"
           echo "GATEWAY_SERVICE_NAME: ${{ vars.GATEWAY_SERVICE_NAME }}"
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
-          API_PRODUCT_NAME=$(yq e '.info.title' ./kong-config/$SPEC_FILE | sed 's/"/\\"/g')
+          API_PRODUCT_NAME=$(yq e '.info.title' ./kong-config/$SPEC_FILE)
           if [ -z "$API_PRODUCT_NAME" ]; then
             echo "API_PRODUCT_NAME=default-api-product" >> $GITHUB_ENV
           else
@@ -109,22 +109,18 @@ jobs:
       - name: Create API product
         id: create_product
         run: |
-          api_product_name="Market Announcements feed \"MAYA\""
+          api_product_name="${{ env.API_PRODUCT_NAME }}"
           echo "Creating a new API product..."
-      
           response=$(curl --request POST \
-            --url "${{ secrets.ADMIN_API_URL }}/api-products" \
-            --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
+            --url ${{ vars.ADMIN_API_URL }}/api-products \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
-            --data "{
-              \"name\": \"$api_product_name\",
-              \"description\": \"New API product\"
-            }")
-      
+            --data '{
+              "name": "'"$api_product_name"'",
+              "description": "New API product"
+            }')
           echo "API response: $response"
-      
           api_product_id=$(echo "$response" | jq -r '.id')
-      
           if [ "$api_product_id" == "null" ] || [ -z "$api_product_id" ]; then
             echo "Failed to create API product. Response: $response"
             exit 1
@@ -132,9 +128,6 @@ jobs:
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
             echo "Created API product with ID: $api_product_id"
           fi
-            
-
-
       #   run: |
       #     dev_portal_id=$(curl --request GET \
       #       --url ${{ vars.ADMIN_API_URL }}/portals \
