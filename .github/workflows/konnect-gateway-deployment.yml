@@ -113,7 +113,7 @@ jobs:
           echo "Creating a new API product..."
       
           response=$(curl --request POST \
-            --url ${{ secrets.ADMIN_API_URL }}/api-products \
+            --url "${{ secrets.ADMIN_API_URL }}/api-products" \
             --header "Authorization: Bearer ${{ secrets.KONNECT_TOKEN }}" \
             --header 'Content-Type: application/json' \
             --data "{
@@ -132,6 +132,7 @@ jobs:
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
             echo "Created API product with ID: $api_product_id"
           fi
+      
 
 
       #   run: |
