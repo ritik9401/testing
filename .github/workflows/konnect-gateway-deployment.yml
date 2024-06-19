@@ -109,7 +109,7 @@ jobs:
       - name: Create API product
         id: create_product
         run: |
-          api_product_name="${API_PRODUCT_NAME}"
+          api_product_name="${{ env.API_PRODUCT_NAME }}"
           echo "Creating a new API product..."
 
           response=$(curl --request POST \
@@ -132,6 +132,7 @@ jobs:
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
             echo "Created API product with ID: $api_product_id"
           fi
+
       #   run: |
       #     dev_portal_id=$(curl --request GET \
       #       --url ${{ vars.ADMIN_API_URL }}/portals \
