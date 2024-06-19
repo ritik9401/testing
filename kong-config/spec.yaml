@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Market Announcements feed "MAYA"
+  title: Board & Management
   version: 1.0.0
   description: This is a sample API description.
   contact:
