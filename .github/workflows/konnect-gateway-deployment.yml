@@ -89,8 +89,9 @@ jobs:
       - name: Fetch spec file
         run: |
           cd ./kong-config
-          SPEC_FILE=$(ls -p | grep -v / | grep -v -v -e ".*" | grep "spec.yaml")
+          SPEC_FILE=$(ls -p | grep -v / | grep "^spec.yaml$")
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
+
 
 
       - name: Fetch environment variables
