@@ -1,0 +1,5 @@
+{
+  "CONTROL_PLANE_NAME": "default",
+  "APPLICATION_AUTH_STRATEGY": "key-auth",
+  "SERVICE_HOST": "97288be5494f4582a51d1350b25978bb.api.mockbin.io"
+}
