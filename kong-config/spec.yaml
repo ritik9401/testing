@@ -1,40 +1,138 @@
 openapi: 3.0.0
 info:
-  title: Market Announcements feed "MAYA"
-  version: 1.0.0
-  description: This is a sample API description.
+  title: 'Positions'
+  description: 'This interface you can find the positions of board and management'
+  termsOfService: 'https://openapi.tase.co.il/tase/prod/tsandcs'
   contact:
-    name: API Support
-    email: support@example.com
-    url: https://example.com/support
+    email: apisupport@tase.co.il
+  license:
+    name: Tase API 1.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  version: 2.0.2
 servers:
-  - url: 'https://mocktarget.apigee.net/json'
+  - url: 'https://65.2.164.57:8443'
+    description: MAYA API Swagger Test
+tags:
+  - name: 'Board & Management in companies traded on the Tel Aviv Stock Exchange'
+    description: 'In this product you can find the board and management positions'
 paths:
-  /hello:
+  '/board-and-management/positions':
     get:
-      summary: Get Hello Message
-      description: Retrieve a simple hello message.
-      operationId: getHelloMessage
       tags:
-        - Hello
+        - positions
+      summary: 'This interface you can find the positions of board and management'
+      description: 'This interface you can find the positions of board and management'
+      operationId: getBoardAndManagementPositions
+      parameters:
+        - in: header
+          name: accept-language
+          schema:
+            type: string
+            enum: [en-US, he-IL]
+            default: he-IL
+          required: true
+        - in: query
+          name: issuerId
+          required: false
+          description: Enter issuer number
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 99999999
+            example: 76
       responses:
         '200':
-          description: Successful response
+          description: successful operation
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Hello, world!
+                $ref: '#/components/schemas/BoardAndManagementPositionsResponse'
         '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
+          description: Invalid status value
+components:
+  schemas:
+    securities:
+      type: object
+      description: 'List of securities that are associated'
+      properties:
+        balance:
+          type: number
+          description: Balance
+          example: 1529985
+        balanceDate:
+          type: string
+          description: Balance date
+          example: '2008-12-11T00:00:00'
+        securityId:
+          type: integer
+          description: Security number
+          example: false
+        capital:
+          type: number
+          description: Capital %
+          example: 18.9
+        voting:
+          type: boolean
+          description: Voting %
+          example: false
+        reportDated:
+          type: string
+          description: Report dated
+          example: '2008-12-11T00:00:00'
+    BoardAndManagementPositionsResponse:
+      type: object
+      description: List of Board And Management
+      properties:
+        getBoardAndManagementPositions:
+          type: object
+          properties:
+            result:
+              type: array
+              items:
                 type: object
                 properties:
-                  error:
+                  issuerId:
+                    type: integer
+                    description: Issuer number
+                    example: 76
+                  issuerName:
                     type: string
-                    example: Invalid request
+                    description: Issuer name
+                    example: RIMONI INDUSTRIES LTD
+                  name:
+                    type: string
+                    description: Name
+                    example: RIMONI YOTAM
+                  id:
+                    type: string
+                    description: Id
+                    example: '024934861'
+                  position:
+                    type: string
+                    description: Position
+                    example: Director
+                  auditCommittee:
+                    type: boolean
+                    description: Audit Committee
+                    example: false
+                  financialExpert:
+                    type: boolean
+                    description: Financial expert
+                    example: false
+                  securities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/securities'
+            total:
+              type: integer
+              description: Total items
+              example: 11
+          xml:
+            name: BoardAndManagementPositionsResponse
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: apikey
+security:
+  - apiKey: []
