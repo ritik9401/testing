@@ -114,6 +114,7 @@ jobs:
           cd ./kong-config
           SPEC_FILE="spec.yaml"  # Assuming the file name is known
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
+          
       - name: Fetch environment variables and extract Product details
         id: set_env_vars
         run: |
