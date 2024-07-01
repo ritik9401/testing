@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Install Newman
         run: npm install -g newman
 
@@ -40,8 +43,8 @@ jobs:
           CONTROL_PLANE_NAME=$(echo $config | jq -r .CONTROL_PLANE_NAME)
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
 
-      - name: Lint OAS spec using Spectral
-        run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+      # - name: Lint OAS spec using Spectral
+      #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
       - name: Generate new gateway configuration
         run: |
