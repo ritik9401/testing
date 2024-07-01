@@ -14,6 +14,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
+      - name: Print current working directory
+        run: pwd
+
+      - name: Verify file path
+        run: ls -al ./config.json
+
       - name: Install Node.js and npm
         uses: actions/setup-node@v2
         with:
@@ -35,9 +41,6 @@ jobs:
           sudo cp /tmp/deck /usr/local/bin/
           deck version
 
-      - name: Print current working directory
-        run: pwd
-
       - name: Fetch environment variables and extract Product details
         id: set_env_vars
         run: |
@@ -46,10 +49,8 @@ jobs:
           CONTROL_PLANE_NAME=$(echo "$config" | jq -r '.CONTROL_PLANE_NAME')
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
 
-      # - name: Lint OAS spec using Spectral
-      #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
-
-      # # Continue with the rest of your steps...
+      - name: Lint OAS spec using Spectral
+        run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
 
       - name: Generate new gateway configuration
