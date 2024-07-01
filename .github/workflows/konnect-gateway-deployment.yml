@@ -126,6 +126,56 @@ jobs:
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY" >> $GITHUB_ENV
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
+
+      - name: Check if the API product already exists or create a new one
+        run: |
+          response=$(curl -s --request GET \
+            --url "${{ env.ADMIN_API_URL }}/api-products" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
+
+          if [[ $response == *"${{ env.API_PRODUCT_NAME }}"* ]]; then
+            echo "The API product already exists. Retrieving the Product ID."
+            api_product_id=$(curl --request GET \
+              --url ${{ env.ADMIN_API_URL }}/api-products \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              | jq -r --arg api_product_name "${{ env.API_PRODUCT_NAME }}" '.data[] | select(.name == $api_product_name) | .id')
+            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
+          else
+            echo "The API product doesn't exist. Creating it now..."
+            api_product_id=$(curl --request POST \
+              --url ${{ env.ADMIN_API_URL }}/api-products \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "${{ env.API_PRODUCT_NAME }}",
+                "description": "${{ env.API_PRODUCT_DESCRIPTION }}",
+                "labels": {}
+              }' | jq -r '.id')
+            echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
+          fi
+
+
+      - name: Get Developer Portal ID
+        run: |
+          Dev_portal_id=$(curl --request GET \
+            --url "${{ env.ADMIN_API_URL }}/portals" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+            | jq -r '.data[].id')
+          echo "DEV_PORTAL_ID=$Dev_portal_id" >> $GITHUB_ENV
+
+      - name: Publish API product with portal ID
+        run: |
+          curl --request PATCH \
+            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+            --header 'Content-Type: application/json' \
+            --data '{
+              "portal_ids": ["${{ env.DEV_PORTAL_ID }}"]
+            }'
+
+              
+
+
       - name: Create product version if it doesn't exist
         run: |
           CURRENT_PRODUCT_VERSION_ID=$(curl -s --request GET \
@@ -149,48 +199,6 @@ jobs:
             echo "API_PRODUCT_VERSION_ID=$CURRENT_PRODUCT_VERSION_ID" >> $GITHUB_ENV
           fi
 
-
-
-      - name: Get Developer Portal ID
-        run: |
-          Dev_portal_id=$(curl --request GET \
-            --url "${{ env.ADMIN_API_URL }}/portals" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            | jq -r '.data[].id')
-          echo "DEV_PORTAL_ID=$Dev_portal_id" >> $GITHUB_ENV
-
-      - name: Patch API product with portal IDs
-        run: |
-          curl --request PATCH \
-            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            --header 'Content-Type: application/json' \
-            --data '{
-              "portal_ids": ["${{ env.DEV_PORTAL_ID }}"]
-            }'
-
-              
-      - name: Create product version if it doesn't exist
-        run: |
-          CURRENT_PRODUCT_VERSION_ID=$(curl -s --request GET \
-            --url "${{ env.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            | jq -r --arg api_version "${{ env.API_PRODUCT_VERSION }}" '.data[] | select(.name == $api_version) | .id // empty')
-          if [ -z "$CURRENT_PRODUCT_VERSION_ID" ]; then
-            echo "> Version $API_PRODUCT_VERSION not found in API Versions for $API_PRODUCT_NAME - creating it..."
-            api_product_version_id=$(curl --request POST \
-              --url ${{ env.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "name": "${{ env.API_PRODUCT_VERSION }}",
-                "publish_status": "published"
-              }' | jq -r '.id')
-            echo "API_PRODUCT_VERSION_ID=$api_product_version_id" >> $GITHUB_ENV
-          else
-            echo "> Version $API_PRODUCT_VERSION already exists for API $API_NAME with ID $API_PRODUCT_NAME"
-            echo "API_PRODUCT_VERSION_ID=$CURRENT_PRODUCT_VERSION_ID" >> $GITHUB_ENV
-          fi
       - name: Get Control Plane ID
         run: |
           control_plane_id=$(curl --location "${{ env.ADMIN_API_URL }}/control-planes" \
