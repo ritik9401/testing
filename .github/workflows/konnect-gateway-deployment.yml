@@ -132,7 +132,7 @@ jobs:
           response=$(curl -s --request GET \
             --url "${{ env.ADMIN_API_URL }}/api-products" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
-      
+          
           if echo "$response" | jq -e ".data[] | select(.name == \"${{ env.API_PRODUCT_NAME }}\")" > /dev/null; then
             echo "The API product already exists. Retrieving the Product ID."
             api_product_id=$(curl --request GET \
