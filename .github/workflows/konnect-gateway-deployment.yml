@@ -137,7 +137,7 @@ jobs:
       - name: Check if the API product already exists or create a new one
         run: |
           response=$(curl -s --request GET \
-            --url "https://vdgfeu.api.konghq.com/v2/api-products" \
+            --url "https://eu.api.konghq.com/v2/api-products" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
       
           if [[ $response == *"API_PRODUCT_NAME"* ]]; then
