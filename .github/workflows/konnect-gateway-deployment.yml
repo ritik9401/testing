@@ -19,14 +19,14 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
       - name: Install Newman
         run: npm install -g newman
 
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Install Deck
         run: |
@@ -40,11 +40,14 @@ jobs:
         run: |
           config=$(cat ./config.json)
           echo "CONFIG=$config" >> $GITHUB_ENV
-          CONTROL_PLANE_NAME=$(echo $config | jq -r .CONTROL_PLANE_NAME)
+          CONTROL_PLANE_NAME=$(echo "$config" | jq -r '.CONTROL_PLANE_NAME')
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
 
       # - name: Lint OAS spec using Spectral
       #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+
+      # # Continue with the rest of your steps...
+
 
       - name: Generate new gateway configuration
         run: |
