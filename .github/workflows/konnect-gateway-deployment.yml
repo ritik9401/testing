@@ -165,9 +165,9 @@ jobs:
             --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             --header 'Content-Type: application/json' \
-            --data "{
-              \"portal_ids\": [\"${{ env.DEV_PORTAL_ID }}\"]
-            }"
+            --data '{
+              "portal_ids": ["${{ env.DEV_PORTAL_ID }}"]
+            }'
 
               
       - name: Create product version if it doesn't exist
