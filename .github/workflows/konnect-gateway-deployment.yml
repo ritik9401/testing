@@ -166,7 +166,6 @@ jobs:
           echo "DEV_PORTAL_ID=$Dev_portal_id" >> $GITHUB_ENV
 
       - name: Publish API product with portal ID
-        if: steps.check_or_create_api_product.outputs.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           curl --request PATCH \
             --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
