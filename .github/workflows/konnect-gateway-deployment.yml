@@ -154,11 +154,11 @@ jobs:
       - name: Get Developer Portal ID
         run: |
           curl --request PATCH \
-            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+            --url ${{ env.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             --header 'Content-Type: application/json' \
             --data "{
-              \"portal_ids\": [\"${{ env.DEV_PORTAL_ID }}\"]
+              \"portal_ids\": [\"$DEV_PORTAL_ID\"]
             }"
       - name: Publish product to the dev portal
         run: |
