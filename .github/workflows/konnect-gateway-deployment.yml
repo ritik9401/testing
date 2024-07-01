@@ -117,7 +117,7 @@ jobs:
       - name: Find OAS file name in the directory
         run: |
           cd ./kong-config
-          SPEC_FILE=$(cat spec.yaml)
+          SPEC_FILE=$(spec.yaml)
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
 
       - name: Fetch environment variables and extract Product details
