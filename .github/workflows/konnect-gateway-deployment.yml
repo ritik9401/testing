@@ -35,6 +35,9 @@ jobs:
           sudo cp /tmp/deck /usr/local/bin/
           deck version
 
+      - name: Print current working directory
+        run: pwd
+
       - name: Fetch environment variables and extract Product details
         id: set_env_vars
         run: |
