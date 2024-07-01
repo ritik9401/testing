@@ -1,44 +1,29 @@
 _format_version: "3.0"
-# if selector info is not present it will add on top level
 add-plugins:
 - selectors:
-  plugins:
-  - config:
-      echo_downstream: false
-      generator: uuid
-      header_name: Kong-Request-ID
-    enabled: true
-    name: correlation-id
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-- selectors:
-  plugins:    
-  - config:
-      content_type: application/json
-      custom_fields_by_lua: []
-      flush_timeout: null
-      headers: []
-      http_endpoint: https://http-inputs-example.splunkcloud.com/services/collector/raw
-      keepalive: 60000
-      method: POST
-      queue:
-        initial_retry_delay: 0.01
-        max_batch_size: 1
-        max_bytes: null
-        max_coalescing_delay: 1
-        max_entries: 10000
-        max_retry_delay: 60
-        max_retry_time: 60
-      queue_size: null
-      retry_count: null
-      timeout: 10000
-    enabled: true
-    name: http-log
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
+    plugins:
+    - config:
+        origins:
+        - "*"
+        methods:
+        - GET
+        - POST
+        headers:
+        - Accept
+        - Accept-Version
+        - Content-Length
+        - Content-MD5
+        - Content-Type
+        - Date
+        - X-Auth-Token
+        exposed_headers:
+        - X-Auth-Token
+        credentials: true
+        max_age: 3600
+      enabled: true
+      name: cors
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
