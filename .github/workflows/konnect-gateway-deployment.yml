@@ -159,7 +159,7 @@ jobs:
       - name: Get Developer Portal ID
         run: |
           Dev_portal_id=$(curl --request GET \
-            --url "${{ env.ADMIN_API_URL }}/portals" \
+            --url "${{ vars.ADMIN_API_URL }}/portals" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r '.data[].id')
           echo "DEV_PORTAL_ID=$Dev_portal_id" >> $GITHUB_ENV
@@ -167,7 +167,7 @@ jobs:
       - name: Publish API product with portal ID
         run: |
           curl --request PATCH \
-            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
+            --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             --header 'Content-Type: application/json' \
             --data '{
@@ -177,14 +177,14 @@ jobs:
       - name: Create product version if it doesn't exist
         run: |
           CURRENT_PRODUCT_VERSION_ID=$(curl -s --request GET \
-            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
+            --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg api_version "${{ env.API_PRODUCT_VERSION }}" '.data[] | select(.name == $api_version) | .id // empty')
       
           if [ -z "$CURRENT_PRODUCT_VERSION_ID" ]; then
             echo "Version ${{ env.API_PRODUCT_VERSION }} not found for API product ${{ env.API_PRODUCT_NAME }} - creating it..."
             api_product_version_id=$(curl -s --request POST \
-              --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
+              --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
               --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
               --header 'Content-Type: application/json' \
               --data '{
@@ -254,7 +254,7 @@ jobs:
                   | jq -r '.data[] | .id')
                 if [ -n "$specifications_id" ]; then
                   echo "Specifications ID: $specifications_id"
-                  curl --location --request PATCH "${{ env.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications/$specifications_id" \
+                  curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications/$specifications_id" \
                     --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
                     --header 'Content-Type: application/json' \
                     --data '{
