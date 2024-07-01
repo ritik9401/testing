@@ -48,6 +48,10 @@ jobs:
           echo "CONFIG=$config" >> $GITHUB_ENV
           CONTROL_PLANE_NAME=$(echo "$config" | jq -r '.CONTROL_PLANE_NAME')
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
+          APPLICATION_AUTH_STRATEGY=$(echo "$config" | jq -r '.APPLICATION_AUTH_STRATEGY')
+          echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY" >> $GITHUB_ENV
+          SERVICE_HOST=$(echo "$config" | jq -r '.SERVICE_HOST')
+          echo "SERVICE_HOST=$SERVICE_HOST" >> $GITHUB_ENV
 
       - name: Lint OAS spec using Spectral
         run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
