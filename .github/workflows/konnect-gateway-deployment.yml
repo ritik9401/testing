@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
 
-# jobs:
+jobs:
 #   deploy_to_konnect:
 #     runs-on: ubuntu-latest
 #     name: Deploying Kong Configuration
