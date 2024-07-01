@@ -137,21 +137,21 @@ jobs:
       - name: Check if the API product already exists or create a new one
         run: |
           response=$(curl -s --request GET \
-            --url "${{ vars.ADMIN_API_URL }}/api-products" \
+            --url "https://vdgfeu.api.konghq.com/v2/api-products" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
-
-          if [[ $response == *"${{ env.API_PRODUCT_NAME }}"* ]]; then
+      
+          if [[ $response == *"API_PRODUCT_NAME"* ]]; then
             echo "The API product already exists. Retrieving the Product ID."
             api_product_id=$(curl --request GET \
-              --url ${{ vars.ADMIN_API_URL }}/api-products \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --url https://vdgfeu.api.konghq.com/v2/api-products \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
               | jq -r --arg api_product_name "${{ env.API_PRODUCT_NAME }}" '.data[] | select(.name == $api_product_name) | .id')
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
           else
             echo "The API product doesn't exist. Creating it now..."
             api_product_id=$(curl --request POST \
-              --url ${{ vars.ADMIN_API_URL }}/api-products \
-              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --url https://vdgfeu.api.konghq.com/v2/api-products \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
               --header 'Content-Type: application/json' \
               --data '{
                 "name": "${{ env.API_PRODUCT_NAME }}",
@@ -160,6 +160,7 @@ jobs:
               }' | jq -r '.id')
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
           fi
+
 
       - name: Get Developer Portal ID
         run: |
