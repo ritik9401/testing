@@ -1,3 +1,11 @@
+name: konnect-gateway-deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
 jobs:
   deploy_to_konnect:
     runs-on: ubuntu-latest
