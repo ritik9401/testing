@@ -101,38 +101,13 @@ jobs:
       #     KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
       #     CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
 
-  name: konnect-gateway-deployment
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  deploy_to_konnect:
+  publish-customer-api-to-portal:
+    name: Publish OAS to dev portal
+    # needs: deploy_to_konnect
     runs-on: ubuntu-latest
-    name: Deploying Kong Configuration
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-
-      - name: Print current working directory
-        run: pwd
-
-      - name: Verify file path
-        run: ls -al ./testing/kong-config/spec.yaml
-
-      - name: Install Node.js and npm
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-
-      - name: Install Newman
-        run: npm install -g newman
-
-      - name: Install Spectral
-        run: npm install -g @stoplight/spectral-cli
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
