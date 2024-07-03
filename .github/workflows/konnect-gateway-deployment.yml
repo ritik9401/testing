@@ -247,7 +247,8 @@ jobs:
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
-
+          echo "Service ID: $service_id"  # Print the ID for confirmation
+ 
 
       - name: Retrieving current service link information to the api product
         run: |
