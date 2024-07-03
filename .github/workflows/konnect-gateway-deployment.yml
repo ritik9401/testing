@@ -239,7 +239,7 @@ jobs:
 
       - name: Get Service ID
         run: |
-          service_id=$(curl --location "${{ vars.ADMIN_API_URL }}/control-planes/${{ env.CONTROL_PLANE_ID }}/core-entities/services" \
+          service_id=$(curl --location "${{ vars.ADMIN_API_URL }}control-planes/${{ env.CONTROL_PLANE_ID }}/core-entities/services" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg gw_service_name "${{ env.GW_SERVICE_NAME }}" '.data[] | select(.name == $gw_service_name) | .id')
           echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
