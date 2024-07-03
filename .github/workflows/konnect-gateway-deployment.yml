@@ -127,6 +127,14 @@ jobs:
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY" >> $GITHUB_ENV
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
+          
+      - name: Debug API_PRODUCT_NAME and other variables
+        run: |
+          echo "API_PRODUCT_NAME=${{ env.API_PRODUCT_NAME }}"
+          echo "API_PRODUCT_DESCRIPTION=${{ env.API_PRODUCT_DESCRIPTION }}"
+          echo "API_PRODUCT_VERSION=${{ env.API_PRODUCT_VERSION }}"
+          echo "GW_SERVICE_NAME=${{ env.GW_SERVICE_NAME }}"
+
       - name: Check if the API product already exists or create a new one
         id: check_or_create_api_product
         run: |
@@ -155,6 +163,9 @@ jobs:
               }' | jq -r '.id')
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
           fi
+          
+      - name: Debug API_PRODUCT_ID
+        run: echo "API_PRODUCT_ID=${{ env.API_PRODUCT_ID }}"
 
       - name: Get Developer Portal ID
         run: |
@@ -166,6 +177,11 @@ jobs:
       
       - name: Publish API product with portal ID
         run: |
+          if [ -z "${{ env.API_PRODUCT_ID }}" ]; then
+            echo "Error: API_PRODUCT_ID is not set"
+            exit 1
+          fi
+
           curl --request PATCH \
             --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
@@ -197,76 +213,80 @@ jobs:
             echo "API_PRODUCT_VERSION_ID=$CURRENT_PRODUCT_VERSION_ID" >> $GITHUB_ENV
           fi
       
-            - name: Get Control Plane ID
-              run: |
-                control_plane_id=$(curl --location "${{ vars.ADMIN_API_URL }}/control-planes" \
-                  --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                  | jq -r --arg control_plane_name "${{ env.CONTROL_PLANE_NAME }}" '.data[] | select(.name == $control_plane_name) | .id')
-                echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
-            - name: Get Service ID
-              run: |
-                service_id=$(curl --location "${{ vars.ADMIN_API_URL }}/control-planes/${{ env.CONTROL_PLANE_ID }}/core-entities/services" \
-                  --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                  | jq -r --arg gw_service_name "${{ env.GW_SERVICE_NAME }}" '.data[] | select(.name == $gw_service_name) | .id')
-                echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
-            - name: Retrieving current service link information to the api product
-              run: |
-                # Retrieving information on which API product version is associated with a service link in case of a rollback.
-                rollback_api_product_version=$(curl -s --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
-                  --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                  | jq -r '.data[] | select(.gateway_service != null) | .name')
-                rollback_api_product_version_id=$(curl -s --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
-                  --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                  | jq -r '.data[] | select(.gateway_service != null) | .id')
-                echo "ROLLBACK_SERVICE_LINK_VERSION=$rollback_api_product_version" >> $GITHUB_ENV
-                echo "ROLLBACK_SERVICE_LINK_VERSION_ID=$rollback_api_product_version_id" >> $GITHUB_ENV
-            - name: Link service to the product version
-              run: |
-                echo "Check if current service link product version and the version specified in the OAS specification version is same or not.."
-                if [[ "${{ env.ROLLBACK_SERVICE_LINK_VERSION }}" != "${{ env.API_PRODUCT_VERSION }}" ]]; then
-                  echo "The product version differs; therefore, unlinking the service from ${{ env.ROLLBACK_SERVICE_LINK_VERSION }}"
-                  curl --location --request DELETE "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$ROLLBACK_SERVICE_LINK_VERSION_ID" \
-                    --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                    --header 'Content-Type: application/json'
-                  echo "Linking the service to ${{ env.API_PRODUCT_VERSION }}"
-                  curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID" \
-                    --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                    --header 'Content-Type: application/json' \
-                    --data '{
-                      "name": "${{ env.API_PRODUCT_VERSION }}",
-                      "publish_status": "published",
-                      "deprecated": false,
-                      "notify": true,
-                      "gateway_service": {
-                        "control_plane_id": "${{ env.CONTROL_PLANE_ID }}",
-                        "id": "${{ env.SERVICE_ID }}"
-                      }
-                    }'
-                else
-                  echo "The product versions match (current - ${{ env.ROLLBACK_SERVICE_LINK_VERSION }} & OAS Spec - ${{ env.API_PRODUCT_VERSION }}); therefore, no changes needed for the service link"
-                fi
-            - name: Upload spec on the version
-              run: |
-                encoded_spec=$(base64 -w 0 ./kong-config/${{ env.SPEC_FILE }})
-                echo "Check if specifications is already there or not .."
-                specifications_id=$(curl --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications" \
-                  --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                  | jq -r '.data[] | .id')
-                if [ -n "$specifications_id" ]; then
-                  echo "Specifications ID: $specifications_id"
-                  curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications/$specifications_id" \
-                    --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                    --header 'Content-Type: application/json' \
-                    --data '{
-                      "name": "${{ env.SPEC_FILE }}",
-                      "content": "'"$encoded_spec"'"
-                    }'
-                else
-                  curl --location --request POST "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications" \
-                    --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-                    --header 'Content-Type: application/json' \
-                    --data '{
-                      "name": "${{ env.SPEC_FILE }}",
-                      "content": "'"$encoded_spec"'"
-                    }'
-                fi
+      - name: Get Control Plane ID
+        run: |
+          control_plane_id=$(curl --location "${{ vars.ADMIN_API_URL }}/control-planes" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+            | jq -r --arg control_plane_name "${{ env.CONTROL_PLANE_NAME }}" '.data[] | select(.name == $control_plane_name) | .id')
+          echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
+
+      - name: Get Service ID
+        run: |
+          service_id=$(curl --location "${{ vars.ADMIN_API_URL }}/control-planes/${{ env.CONTROL_PLANE_ID }}/core-entities/services" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+            | jq -r --arg gw_service_name "${{ env.GW_SERVICE_NAME }}" '.data[] | select(.name == $gw_service_name) | .id')
+          echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
+
+      - name: Retrieving current service link information to the api product
+        run: |
+          # Retrieving information on which API product version is associated with a service link in case of a rollback.
+          rollback_api_product_version=$(curl -s --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+            | jq -r '.data[] | select(.gateway_service != null) | .name')
+          rollback_api_product_version_id=$(curl -s --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+            | jq -r '.data[] | select(.gateway_service != null) | .id')
+          echo "ROLLBACK_SERVICE_LINK_VERSION=$rollback_api_product_version" >> $GITHUB_ENV
+          echo "ROLLBACK_SERVICE_LINK_VERSION_ID=$rollback_api_product_version_id" >> $GITHUB_ENV
+
+      - name: Link service to the product version
+        run: |
+          echo "Check if current service link product version and the version specified in the OAS specification version is same or not.."
+          if [[ "${{ env.ROLLBACK_SERVICE_LINK_VERSION }}" != "${{ env.API_PRODUCT_VERSION }}" ]]; then
+            echo "The product version differs; therefore, unlinking the service from ${{ env.ROLLBACK_SERVICE_LINK_VERSION }}"
+            curl --location --request DELETE "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$ROLLBACK_SERVICE_LINK_VERSION_ID" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+              --header 'Content-Type: application/json'
+            echo "Linking the service to ${{ env.API_PRODUCT_VERSION }}"
+            curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "${{ env.API_PRODUCT_VERSION }}",
+                "publish_status": "published",
+                "deprecated": false,
+                "notify": true,
+                "gateway_service": {
+                  "control_plane_id": "${{ env.CONTROL_PLANE_ID }}",
+                  "id": "${{ env.SERVICE_ID }}"
+                }
+              }'
+          else
+            echo "The product versions match (current - ${{ env.ROLLBACK_SERVICE_LINK_VERSION }} & OAS Spec - ${{ env.API_PRODUCT_VERSION }}); therefore, no changes needed for the service link"
+          fi
+
+      - name: Upload spec on the version
+        run: |
+          encoded_spec=$(base64 -w 0 ./kong-config/${{ env.SPEC_FILE }})
+          echo "Check if specifications is already there or not .."
+          specifications_id=$(curl --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+            | jq -r '.data[] | .id')
+          if [ -n "$specifications_id" ]; then
+            echo "Specifications ID: $specifications_id"
+            curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications/$specifications_id" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "${{ env.SPEC_FILE }}",
+                "content": "'"$encoded_spec"'"
+              }'
+          else
+            curl --location --request POST "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "${{ env.SPEC_FILE }}",
+                "content": "'"$encoded_spec"'"
+              }'
+          fi
