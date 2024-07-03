@@ -241,13 +241,10 @@ jobs:
 
       - name: Get Service ID
         run: |
-          service_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/${{ env.CONTROL_PLANE_ID }}/core-entities/services" \
+          service_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/${CONTROL_PLANE_ID}/core-entities/services" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            | jq -r --arg gw_service_name "${{ env.GW_SERVICE_NAME }}" '.data[] | select(.name == $gw_service_name) | .id')
+            | jq -r --arg gw_service_name "${GW_SERVICE_NAME}" '.data[] | select(.name == $gw_service_name) | .id')
           echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
-        env:
-          CONTROL_PLANE_ID: ${{ env.CONTROL_PLANE_ID }}
-          GW_SERVICE_NAME: ${{ env.GW_SERVICE_NAME }}
 
 
       - name: Retrieving current service link information to the api product
