@@ -115,20 +115,18 @@ jobs:
       - name: Install yq
         run: sudo apt-get install -y python3-pip && pip3 install yq
 
-      - name: Change directory to kong-config and check spec.yaml
+      - name: Check and set SPEC_FILE environment variable
         run: |
-          cd testing/kong-config
-          if [ ! -f spec.yaml ]; then
-            echo "spec.yaml file not found in ./testing/kong-config directory"
+          if [ ! -f kong-config/spec.yaml ]; then
+            echo "spec.yaml file not found in ./kong-config directory"
             exit 1
           fi
-          SPEC_FILE="spec.yaml"
+          SPEC_FILE="kong-config/spec.yaml"
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
 
       - name: Fetch environment variables and extract Product details
         id: set_env_vars
         run: |
-          cd testing/kong-config
           echo "API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')" >> $GITHUB_ENV
           echo "API_PRODUCT_DESCRIPTION=$(yq e '.info.description' $SPEC_FILE)" >> $GITHUB_ENV
           echo "API_PRODUCT_VERSION=$(yq e '.info.version' $SPEC_FILE)" >> $GITHUB_ENV
