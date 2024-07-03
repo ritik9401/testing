@@ -232,16 +232,23 @@ jobs:
       
       - name: Get Control Plane ID
         run: |
-          control_plane_id=$(curl --location "${{ vars.ADMIN_API_URL }}/control-planes" \
+          control_plane_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg control_plane_name "${{ env.CONTROL_PLANE_NAME }}" '.data[] | select(.name == $control_plane_name) | .id')
           echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
+        env:
+          CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
 
       - name: Get Service ID
         run: |
-          service_id=$(curl --location "${{ vars.ADMIN_API_URL }}/control-planes/${{ env.CONTROL_PLANE_ID }}/core-entities/services" \
+          service_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/${{ env.CONTROL_PLANE_ID }}/core-entities/services" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            | jq -r --arg gw_service_name "${{ env.GW_SERVICE_NAME }}" '.data[]
+            | jq -r --arg gw_service_name "${{ env.GW_SERVICE_NAME }}" '.data[] | select(.name == $gw_service_name) | .id')
+          echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
+        env:
+          CONTROL_PLANE_ID: ${{ env.CONTROL_PLANE_ID }}
+          GW_SERVICE_NAME: ${{ env.GW_SERVICE_NAME }}
+
 
       - name: Retrieving current service link information to the api product
         run: |
