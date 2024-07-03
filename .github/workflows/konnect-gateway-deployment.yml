@@ -233,7 +233,7 @@ jobs:
       - name: Get Control Plane ID
         run: |
           control_plane_name="${{ env.CONTROL_PLANE_NAME }}"
-          control_plane_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes" \
+          control_plane_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
           echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
