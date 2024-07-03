@@ -237,6 +237,7 @@ jobs:
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
           echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
+          echo "Control Plane ID: $control_plane_id"  # Print the ID for confirmation
 
       - name: Get Service ID
         run: |
