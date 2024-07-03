@@ -231,7 +231,6 @@ jobs:
           fi
       
       - name: Get Control Plane ID
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           control_plane_name="${{ env.CONTROL_PLANE_NAME }}"
           control_plane_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes" \
@@ -240,7 +239,6 @@ jobs:
           echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
 
       - name: Get Service ID
-        if: ${{ needs.deploy_to_konnect.outputs.SERVICE_NOT_LINKED != 'true' }}
         run: |
           control_plane_id="${{ env.CONTROL_PLANE_ID }}"
           gateway_service_name="${{ env.GW_SERVICE_NAME }}"
