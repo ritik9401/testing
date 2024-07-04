@@ -2,90 +2,103 @@ name: konnect-gateway-deployment
 
 on:
   push:
-    branches:
-      - main
+    branches: 
+      - "main"
   workflow_dispatch:
 
 jobs:
-#   deploy_to_konnect:
-#     runs-on: ubuntu-latest
-#     name: Deploying Kong Configuration
-#     steps:
-#       - name: Checkout Code
-#         uses: actions/checkout@v2
+  deploy_to_konnect:
+    runs-on: ubuntu-latest
+    name: Deploying Kong Configuration
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-#       - name: Print current working directory
-#         run: pwd
+      - name: Print current working directory
+        run: pwd
 
-#       - name: Verify file path
-#         run: ls -al ./config.json
+      - name: Verify file path
+        run: ls -al ./config.json
 
-#       - name: Install Node.js and npm
-#         uses: actions/setup-node@v2
-#         with:
-#           node-version: '16'
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
 
-#       - name: Install Newman
-#         run: npm install -g newman
+      - name: Install Newman
+        run: npm install -g newman
 
-#       - name: Install Spectral
-#         run: npm install -g @stoplight/spectral-cli
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
 
-#       - name: Install jq
-#         run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
-#       - name: Install Deck
-#         run: |
-#           curl -sL https://github.com/kong/deck/releases/download/v1.34.0/deck_1.34.0_linux_amd64.tar.gz -o deck.tar.gz
-#           tar -xf deck.tar.gz -C /tmp
-#           sudo cp /tmp/deck /usr/local/bin/
-#           deck version
-#       - name: Fetch environment variables and extract Product details
-#         id: set_env_vars
-#         run: |
-#           config=$(cat ./config.json)
-#           echo "Config content: $config"
-#           CONTROL_PLANE_NAME=$(echo "$config" | jq -r '.CONTROL_PLANE_NAME')
-#           APPLICATION_AUTH_STRATEGY=$(echo "$config" | jq -r '.APPLICATION_AUTH_STRATEGY')
-#           SERVICE_HOST=$(echo "$config" | jq -r '.SERVICE_HOST')
-#           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
-#           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY" >> $GITHUB_ENV
-#           echo "SERVICE_HOST=$SERVICE_HOST" >> $GITHUB_ENV
-#       - name: Display environment variables for verification
-#         run: |
-#           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME"
-#           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY"
-#           echo "SERVICE_HOST=$SERVICE_HOST"
-#       # - name: Lint OAS spec using Spectral
-#       #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+      - name: Install Deck
+        run: |
+          curl -sL https://github.com/kong/deck/releases/download/v1.34.0/deck_1.34.0_linux_amd64.tar.gz -o deck.tar.gz
+          tar -xf deck.tar.gz -C /tmp
+          sudo cp /tmp/deck /usr/local/bin/
+          deck version
+          
+      - name: Fetch environment variables and extract Product details
+        id: set_env_vars
+        run: |
+          config=$(cat ./config.json)
+          echo "Config content: $config"
+          
+          # Fetching other configuration details from CONFIG (assuming CONFIG is defined earlier)
+          CONTROL_PLANE_NAME=$(echo $config | jq -r .CONTROL_PLANE_NAME)
+          ADMIN_API_URL=$(echo $config | jq -r .ADMIN_API_URL)
+          SERVICE_HOST=$(echo $config | jq -r .SERVICE_HOST)
+          
+          # Setting environment variables in GitHub Actions environment
+          echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
+          echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
+          echo "SERVICE_HOST=$SERVICE_HOST" >> $GITHUB_ENV
+          
+      - name: Display environment variables for verification
+        run: |
+          echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME"
+          echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY"
+          echo "SERVICE_HOST=$SERVICE_HOST"
+          
+      # - name: Lint OAS spec using Spectral
+      #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
-#       - name: Generate new gateway configuration
-#         run: |
-#           deck file openapi2kong --spec ./kong-config/spec.yaml --output-file kong.yaml
-#       - name: Add OPTIONS method in all the routes using Deck Patch command.
-#         run: |
-#           deck file patch --selector="$..routes[*].methods" --value='["OPTIONS"]' -s kong.yaml -o kong.yaml
-#       - name: Add Global plugins
-#         run: deck file add-plugins ./kong-config/global-plugin.yaml -s kong.yaml -o kong.yaml
+      - name: Generate new gateway configuration
+        run: |
+          deck file openapi2kong --spec ./kong-config/spec.yaml --output-file kong.yaml
+          
+      - name: Add OPTIONS method in all the routes using Deck Patch command.
+        run: |
+          deck file patch --selector="$..routes[*].methods" --value='["OPTIONS"]' -s kong.yaml -o kong.yaml
 
-#       - name: Ping to Konnect Org
-#         run: deck gateway ping --konnect-token ${{ secrets.KONNECT_TOKEN }}
-#         env:
-#           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+      - name: Replacing the Service host from dataplane to backend host.
+        run: |
+          deck file patch --selector="$..services[*]" --value="host:'$SERVICE_HOST'" -s kong.yaml -o kong.yaml
 
-#       - name: Backup existing configuration
-#         run: |
-#           deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify > kong-backup.yaml
-#         env:
-#           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
-#           CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
+      # - name: Add Global plugins
+      #   run: deck file add-plugins ./kong-config/global-plugin.yaml -s kong.yaml -o kong.yaml
 
-#       - name: Apply new configuration
-#         run: |
-#           deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
-#         env:
-#           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
-#           CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
+      - name: Ping to Konnect Org
+        run: deck gateway ping --konnect-token ${{ secrets.KONNECT_TOKEN }}
+        env:
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+
+      - name: Backup existing configuration
+        run: |
+          deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify > kong-backup.yaml
+        env:
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+          CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
+
+      - name: Apply new configuration
+        run: |
+          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
+        env:
+          KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+          CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
 
       # - name: Wait for a few seconds
       #   run: sleep 10
@@ -101,11 +114,11 @@ jobs:
       #     KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
       #     CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
 
-     publish-customer-api-to-portal:
-      name: Publish OAS to dev portal
-      # needs: deploy_to_konnect
-      runs-on: ubuntu-latest
-      steps:
+  publish-customer-api-to-portal:
+    name: Publish OAS to dev portal
+    needs: deploy_to_konnect
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout Code
         uses: actions/checkout@v2
 
@@ -116,6 +129,7 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
+          
       - name: Check and set SPEC_FILE environment variable
         run: |
           if [ ! -f kong-config/spec.yaml ]; then
