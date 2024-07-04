@@ -124,9 +124,11 @@ jobs:
           fi
           SPEC_FILE="kong-config/spec.yaml"
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
+
       - name: Fetch environment variables and extract Product details
         id: set_env_vars
         run: |
+          # Extracting product details from spec.yaml using yq
           API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
           API_PRODUCT_DESCRIPTION=$(yq e '.info.description' $SPEC_FILE)
           API_PRODUCT_VERSION=$(yq e '.info.version' $SPEC_FILE)
@@ -136,13 +138,16 @@ jobs:
           echo "API_PRODUCT_VERSION=$API_PRODUCT_VERSION" >> $GITHUB_ENV
           echo "GW_SERVICE_NAME=$GW_SERVICE_NAME" >> $GITHUB_ENV
           
+          # Fetching other configuration details from CONFIG (assuming CONFIG is defined earlier)
           CONTROL_PLANE_NAME=$(echo $CONFIG | jq -r .CONTROL_PLANE_NAME)
           ADMIN_API_URL=$(echo $CONFIG | jq -r .ADMIN_API_URL)
           APPLICATION_AUTH_STRATEGY=$(echo $CONFIG | jq -r .APPLICATION_AUTH_STRATEGY)
+          
+          # Setting environment variables in GitHub Actions environment
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
+          echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY" >> $GITHUB_ENV
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
-          echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
 
       - name: Debug API_PRODUCT_NAME and other variables
         run: |
