@@ -1,15 +1,26 @@
 _format_version: "3.0"
 add-plugins:
-- selectors:
-  - 
-    plugins:
-    - config:
-        origins:
-        - "*"
-      enabled: true
-      name: cors
-      protocols:
-      - grpc
-      - grpcs
-      - http
-      - https
+  - plugins:
+      - config:
+          credentials: false
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
+            - TRACE
+            - CONNECT
+          origins:
+            - '*'
+          preflight_continue: false
+          private_network: false
+        enabled: true
+        name: cors
+        protocols:
+          - grpc
+          - grpcs
+          - http
+          - https
