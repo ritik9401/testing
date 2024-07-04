@@ -72,8 +72,8 @@ jobs:
         run: |
           deck file patch --selector="$..services[*]" --value="host:\"$SERVICE_HOST\"" -s kong.yaml -o kong.yaml
 
-      # - name: Add Global plugins
-      #   run: deck file add-plugins ./kong-config/global-plugin.yaml -s kong.yaml -o kong.yaml
+      - name: Add Global plugins
+        run: deck file add-plugins ./kong-config/global-plugin.yaml -s kong.yaml -o kong.yaml
 
       - name: Ping to Konnect Org
         run: deck gateway ping --konnect-token ${{ secrets.KONNECT_TOKEN }}
