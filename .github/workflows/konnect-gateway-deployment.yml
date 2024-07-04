@@ -101,7 +101,7 @@ jobs:
       #     KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
       #     CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
 
-  publish-customer-api-to-portal:
+   publish-customer-api-to-portal:
     name: Publish OAS to dev portal
     # needs: deploy_to_konnect
     runs-on: ubuntu-latest
