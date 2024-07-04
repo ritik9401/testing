@@ -101,11 +101,11 @@ jobs:
       #     KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
       #     CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
 
-   publish-customer-api-to-portal:
-    name: Publish OAS to dev portal
-    # needs: deploy_to_konnect
-    runs-on: ubuntu-latest
-    steps:
+     publish-customer-api-to-portal:
+      name: Publish OAS to dev portal
+      # needs: deploy_to_konnect
+      runs-on: ubuntu-latest
+      steps:
       - name: Checkout Code
         uses: actions/checkout@v2
 
@@ -116,14 +116,6 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
-
-      jobs:
-  publish-customer-api-to-portal:
-    name: Publish OAS to dev portal
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
 
       - name: Check and set SPEC_FILE environment variable
         run: |
