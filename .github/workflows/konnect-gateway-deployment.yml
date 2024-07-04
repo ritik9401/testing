@@ -292,31 +292,43 @@ jobs:
 
       - name: Upload spec on the version
         run: |
-          SPEC_FILE="kong-config/${{ env.SPEC_FILE }}"
+          # Define the specification file path
+          SPEC_FILE="kong-config/spec.yaml"
+          
+          # Check if the specification file exists
           if [ ! -f "$SPEC_FILE" ]; then
             echo "spec.yaml file not found in $SPEC_FILE"
             exit 1
           fi
           
+          # Encode the specification file in base64
           encoded_spec=$(base64 -w 0 "$SPEC_FILE")
           echo "Check if specifications are already there or not .."
           
-          specifications_id=$(curl --location --request GET "https://eu.api.konghq.com/v2/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications" \
-            --header 'Authorization: ***' \
-            | jq -r '.data[] | .id')
+          # Fetch the specifications ID
+          response=$(curl --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}/specifications" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
           
+          # Print the API response for debugging
+          echo "Response from API:"
+          echo "$response"
+          
+          # Extract the specifications ID using jq
+          specifications_id=$(echo "$response" | jq -r '.data[] | .id')
+          
+          # Check if the specifications ID exists and update or create accordingly
           if [ -n "$specifications_id" ]; then
             echo "Specifications ID: $specifications_id"
-            curl --location --request PATCH "https://eu.api.konghq.com/v2/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications/$specifications_id" \
-              --header 'Authorization: ***' \
+            curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}/specifications/$specifications_id" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
               --header 'Content-Type: application/json' \
               --data '{
                 "name": "'"${{ env.SPEC_FILE }}"'",
                 "content": "'"$encoded_spec"'"
               }'
           else
-            curl --location --request POST "https://eu.api.konghq.com/v2/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications" \
-              --header 'Authorization: ***' \
+            curl --location --request POST "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}/specifications" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
               --header 'Content-Type: application/json' \
               --data '{
                 "name": "'"${{ env.SPEC_FILE }}"'",
