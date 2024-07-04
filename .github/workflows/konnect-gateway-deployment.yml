@@ -7,8 +7,103 @@ on:
   workflow_dispatch:
 
 jobs:
+#   deploy_to_konnect:
+#     runs-on: ubuntu-latest
+#     name: Deploying Kong Configuration
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v2
+
+#       - name: Print current working directory
+#         run: pwd
+
+#       - name: Verify file path
+#         run: ls -al ./config.json
+
+#       - name: Install Node.js and npm
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: '16'
+
+#       - name: Install Newman
+#         run: npm install -g newman
+
+#       - name: Install Spectral
+#         run: npm install -g @stoplight/spectral-cli
+
+#       - name: Install jq
+#         run: sudo apt-get update && sudo apt-get install -y jq
+
+#       - name: Install Deck
+#         run: |
+#           curl -sL https://github.com/kong/deck/releases/download/v1.34.0/deck_1.34.0_linux_amd64.tar.gz -o deck.tar.gz
+#           tar -xf deck.tar.gz -C /tmp
+#           sudo cp /tmp/deck /usr/local/bin/
+#           deck version
+#       - name: Fetch environment variables and extract Product details
+#         id: set_env_vars
+#         run: |
+#           config=$(cat ./config.json)
+#           echo "Config content: $config"
+#           CONTROL_PLANE_NAME=$(echo "$config" | jq -r '.CONTROL_PLANE_NAME')
+#           APPLICATION_AUTH_STRATEGY=$(echo "$config" | jq -r '.APPLICATION_AUTH_STRATEGY')
+#           SERVICE_HOST=$(echo "$config" | jq -r '.SERVICE_HOST')
+#           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
+#           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY" >> $GITHUB_ENV
+#           echo "SERVICE_HOST=$SERVICE_HOST" >> $GITHUB_ENV
+#       - name: Display environment variables for verification
+#         run: |
+#           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME"
+#           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY"
+#           echo "SERVICE_HOST=$SERVICE_HOST"
+#       # - name: Lint OAS spec using Spectral
+#       #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+
+#       - name: Generate new gateway configuration
+#         run: |
+#           deck file openapi2kong --spec ./kong-config/spec.yaml --output-file kong.yaml
+#       - name: Add OPTIONS method in all the routes using Deck Patch command.
+#         run: |
+#           deck file patch --selector="$..routes[*].methods" --value='["OPTIONS"]' -s kong.yaml -o kong.yaml
+#       - name: Add Global plugins
+#         run: deck file add-plugins ./kong-config/global-plugin.yaml -s kong.yaml -o kong.yaml
+
+#       - name: Ping to Konnect Org
+#         run: deck gateway ping --konnect-token ${{ secrets.KONNECT_TOKEN }}
+#         env:
+#           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+
+#       - name: Backup existing configuration
+#         run: |
+#           deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify > kong-backup.yaml
+#         env:
+#           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+#           CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
+
+#       - name: Apply new configuration
+#         run: |
+#           deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --select-tag=hello,dev --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
+#         env:
+#           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+#           CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
+
+      # - name: Wait for a few seconds
+      #   run: sleep 10
+
+      # - name: Run API Tests
+      #   id: apiTests
+      #   run: newman run newman/newman_collection.postman_collection.json
+
+      # - name: Back out changes on failure
+      #   if: always() && steps.apiTests.outcome == 'failure'
+      #   run: deck gateway sync kong-backup.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --konnect-addr=https://eu.api.konghq.com --tls-skip-verify
+      #   env:
+      #     KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
+      #     CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
+
   publish-customer-api-to-portal:
     name: Publish OAS to dev portal
+    # needs: deploy_to_konnect
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -21,7 +116,6 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
-
       - name: Check and set SPEC_FILE environment variable
         run: |
           if [ ! -f kong-config/spec.yaml ]; then
@@ -30,106 +124,97 @@ jobs:
           fi
           SPEC_FILE="kong-config/spec.yaml"
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
-
       - name: Fetch environment variables and extract Product details
         id: set_env_vars
         run: |
-          CONFIG=$(cat ./config.json)
-          CONTROL_PLANE_NAME=$(echo $CONFIG | jq -r .CONTROL_PLANE_NAME)
-          APPLICATION_AUTH_STRATEGY=$(echo $CONFIG | jq -r .APPLICATION_AUTH_STRATEGY)
-          ADMIN_API_URL=$(echo $CONFIG | jq -r .ADMIN_API_URL)
-          
           API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
           API_PRODUCT_DESCRIPTION=$(yq e '.info.description' $SPEC_FILE)
           API_PRODUCT_VERSION=$(yq e '.info.version' $SPEC_FILE)
           GW_SERVICE_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]')
-
           echo "API_PRODUCT_NAME=$API_PRODUCT_NAME" >> $GITHUB_ENV
           echo "API_PRODUCT_DESCRIPTION=$API_PRODUCT_DESCRIPTION" >> $GITHUB_ENV
           echo "API_PRODUCT_VERSION=$API_PRODUCT_VERSION" >> $GITHUB_ENV
           echo "GW_SERVICE_NAME=$GW_SERVICE_NAME" >> $GITHUB_ENV
+          
+          CONTROL_PLANE_NAME=$(echo $CONFIG | jq -r .CONTROL_PLANE_NAME)
+          APPLICATION_AUTH_STRATEGY=$(echo $CONFIG | jq -r .APPLICATION_AUTH_STRATEGY)
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY" >> $GITHUB_ENV
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
-          echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
-
       - name: Debug API_PRODUCT_NAME and other variables
         run: |
           echo "API_PRODUCT_NAME=${{ env.API_PRODUCT_NAME }}"
           echo "API_PRODUCT_DESCRIPTION=${{ env.API_PRODUCT_DESCRIPTION }}"
           echo "API_PRODUCT_VERSION=${{ env.API_PRODUCT_VERSION }}"
           echo "GW_SERVICE_NAME=${{ env.GW_SERVICE_NAME }}"
-          echo "CONTROL_PLANE_NAME=${{ env.CONTROL_PLANE_NAME }}"
-          echo "APPLICATION_AUTH_STRATEGY=${{ env.APPLICATION_AUTH_STRATEGY }}"
-          echo "ADMIN_API_URL=${{ env.ADMIN_API_URL }}"
-
       - name: Check if the API product already exists or create a new one
         id: check_or_create_api_product
         run: |
           response=$(curl -s --request GET \
-            --url "${{ env.ADMIN_API_URL }}/api-products" \
+            --url "${{ vars.ADMIN_API_URL }}/api-products" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
           
           if echo "$response" | jq -e ".data[] | select(.name == \"${{ env.API_PRODUCT_NAME }}\")" > /dev/null; then
             echo "The API product already exists. Retrieving the Product ID."
-            api_product_id=$(echo "$response" | jq -r --arg api_product_name "${{ env.API_PRODUCT_NAME }}" '.data[] | select(.name == $api_product_name) | .id')
+            api_product_id=$(curl --request GET \
+              --url "${{ vars.ADMIN_API_URL }}/api-products" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+              | jq -r --arg api_product_name "${{ env.API_PRODUCT_NAME }}" '.data[] | select(.name == $api_product_name) | .id')
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
             echo "API_PRODUCT_ALREADY_EXISTS=true" >> $GITHUB_ENV
           else
             echo "The API product doesn't exist. Creating it now..."
-            api_product_id=$(curl -s --request POST \
-              --url "${{ env.ADMIN_API_URL }}/api-products" \
+            api_product_id=$(curl --request POST \
+              --url "${{ vars.ADMIN_API_URL }}/api-products" \
               --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
               --header 'Content-Type: application/json' \
               --data '{
-                "name": "'"${{ env.API_PRODUCT_NAME }}"'",
-                "description": "'"${{ env.API_PRODUCT_DESCRIPTION }}"'",
+                "name": "${{ env.API_PRODUCT_NAME }}",
+                "description": "${{ env.API_PRODUCT_DESCRIPTION }}",
                 "labels": {}
               }' | jq -r '.id')
             echo "API_PRODUCT_ID=$api_product_id" >> $GITHUB_ENV
           fi
-
       - name: Debug API_PRODUCT_ID
         run: echo "API_PRODUCT_ID=${{ env.API_PRODUCT_ID }}"
 
       - name: Get Developer Portal ID
         run: |
-          Dev_portal_id=$(curl -s --request GET \
-            --url "${{ env.ADMIN_API_URL }}/portals" \
+          Dev_portal_id=$(curl --request GET \
+            --url "${{ vars.ADMIN_API_URL }}/portals" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r '.data[].id')
           echo "DEV_PORTAL_ID=$Dev_portal_id" >> $GITHUB_ENV
-
+      
       - name: Publish API product with portal ID
         run: |
           if [ -z "${{ env.API_PRODUCT_ID }}" ]; then
             echo "Error: API_PRODUCT_ID is not set"
             exit 1
           fi
-
-          curl -s --request PATCH \
-            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
+          curl --request PATCH \
+            --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             --header 'Content-Type: application/json' \
             --data '{
-              "portal_ids": ["'"${{ env.DEV_PORTAL_ID }}"'"]
+              "portal_ids": ["${{ env.DEV_PORTAL_ID }}"]
             }'
-
+      
       - name: Create product version if it doesn't exist
         run: |
           CURRENT_PRODUCT_VERSION_ID=$(curl -s --request GET \
-            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
+            --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg api_version "${{ env.API_PRODUCT_VERSION }}" '.data[] | select(.name == $api_version) | .id // empty')
       
           if [ -z "$CURRENT_PRODUCT_VERSION_ID" ]; then
             echo "Version ${{ env.API_PRODUCT_VERSION }} not found for API product ${{ env.API_PRODUCT_NAME }} - creating it..."
             api_product_version_id=$(curl -s --request POST \
-              --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
+              --url "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
               --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
               --header 'Content-Type: application/json' \
               --data '{
-                "name": "'"${{ env.API_PRODUCT_VERSION }}"'",
+                "name": "${{ env.API_PRODUCT_VERSION }}",
                 "publish_status": "published"
               }' | jq -r '.id')
             echo "API_PRODUCT_VERSION_ID=$api_product_version_id" >> $GITHUB_ENV
@@ -137,100 +222,121 @@ jobs:
             echo "Version ${{ env.API_PRODUCT_VERSION }} already exists for API product ${{ env.API_PRODUCT_NAME }} with ID $CURRENT_PRODUCT_VERSION_ID"
             echo "API_PRODUCT_VERSION_ID=$CURRENT_PRODUCT_VERSION_ID" >> $GITHUB_ENV
           fi
-
+      
       - name: Get Control Plane ID
         run: |
-          control_plane_id=$(curl -s --location "https://eu.api.konghq.com/v2/control-planes/" \
+          # control_plane_name="${{ env.CONTROL_PLANE_NAME }}"
+          control_plane_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            | jq -r --arg control_plane_name "$CONTROL_PLANE_NAME" '.data[] | select(.name == "default") | .id')
+            | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == "default") | .id')
           echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
-          echo "Control Plane ID: $control_plane_id"
-
+          echo "Control Plane ID: $control_plane_id"  # Print the ID for confirmation
       - name: Get Service ID
         run: |
           control_plane_id="${{ env.CONTROL_PLANE_ID }}"
           gateway_service_name="${{ env.GW_SERVICE_NAME }}"
-          service_id=$(curl -s --location "https://eu.api.konghq.com/v2/control-planes/${control_plane_id}/core-entities/services" \
+          service_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/${control_plane_id}/core-entities/services" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
-          echo "Service ID: $service_id"
+          echo "Service ID: $service_id"  # Print the ID for confirmation
+ 
 
-      - name: Fetch rollback API product version details
-        id: fetch_rollback_details
+      - name: Retrieving current service link information to the api product
         run: |
-          # Fetch rollback details from Kong API
-          response=$(curl -s --location --request GET "https://eu.api.konghq.com/v2/api-products/a9452aae-bc44-484e-92a8-573c18d848aa/product-versions" \
-            --header 'Authorization: ***')
+          # Retrieving information on which API product version is associated with a service link in case of a rollback.
+          rollback_api_product_version=$(curl --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            | jq -r '.data[] | select(.gateway_service != null) | .name')
+          rollback_api_product_version_id=$(curl --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions" \
+            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+            | jq -r '.data[] | select(.gateway_service != null) | .id')
+          echo "ROLLBACK_SERVICE_LINK_VERSION=$rollback_api_product_version" >> $GITHUB_ENV
+          echo "ROLLBACK_SERVICE_LINK_VERSION_ID=$rollback_api_product_version_id" >> $GITHUB_ENV
+      - name: Link service to the product version
+        run: |
+          echo "Check if current service link product version and the version specified in the OAS specification version is same or not.."
+          if [[ "${{ env.ROLLBACK_SERVICE_LINK_VERSION }}" != "${{ env.API_PRODUCT_VERSION }}" ]]; then
+            echo "The product version differs; therefore, unlinking the service from ${{ env.ROLLBACK_SERVICE_LINK_VERSION }}"
+            curl --location --request DELETE "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$ROLLBACK_SERVICE_LINK_VERSION_ID" \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json'
+            echo "Linking the service to ${{ env.API_PRODUCT_VERSION }}"
+            curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID" \
+              --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "${{ env.API_PRODUCT_VERSION }}",
+                "publish_status": "published",
+                "deprecated": false,
+                "notify": true,
+                "gateway_service": {
+                  "control_plane_id": "${{ env.CONTROL_PLANE_ID }}",
+                  "id": "${{ env.SERVICE_ID }}"
+                }
+              }'
+          else
+            echo "The product versions match (current - ${{ env.ROLLBACK_SERVICE_LINK_VERSION }} & OAS Spec - ${{ env.API_PRODUCT_VERSION }}); therefore, no changes needed for the service link"
+          fi
+      - name: Upload spec on the version
+        run: |
+          # Define the specification file path
+          SPEC_FILE="kong-config/spec.yaml"
           
-          rollback_api_product_version=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .name')
-          rollback_api_product_version_id=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .id')
-          rollback_api_product_service_id=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .gateway_service.id')
-          rollback_api_product_service_runtime_group_id=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .gateway_service.runtime_group_id')
-          rollback_api_product_service_control_plane_id=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .gateway_service.control_plane_id')
-      
-          # Debug output for extracted values
-          echo "rollback_api_product_version: $rollback_api_product_version"
-          echo "rollback_api_product_version_id: $rollback_api_product_version_id"
-          echo "rollback_api_product_service_id: $rollback_api_product_service_id"
-          echo "rollback_api_product_service_runtime_group_id: $rollback_api_product_service_runtime_group_id"
-          echo "rollback_api_product_service_control_plane_id: $rollback_api_product_service_control_plane_id"
-      
-          # Set environment variables
-          echo "ROLLBACK_API_PRODUCT_VERSION=$rollback_api_product_version" >> $GITHUB_ENV
-          echo "ROLLBACK_API_PRODUCT_VERSION_ID=$rollback_api_product_version_id" >> $GITHUB_ENV
-          echo "ROLLBACK_API_PRODUCT_SERVICE_ID=$rollback_api_product_service_id" >> $GITHUB_ENV
-          echo "ROLLBACK_API_PRODUCT_SERVICE_RUNTIME_GROUP_ID=$rollback_api_product_service_runtime_group_id" >> $GITHUB_ENV
-          echo "ROLLBACK_API_PRODUCT_SERVICE_CONTROL_PLANE_ID=$rollback_api_product_service_control_plane_id" >> $GITHUB_ENV
-      
-        
-      - name: Link Gateway Service to the API Product
-        run: |
-          curl -s --request PATCH \
-            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            --header 'Content-Type: application/json' \
-            --data '{
-              "gateway_service": "'"${{ env.SERVICE_ID }}"'"
-            }'
-
-      - name: Validate API product service link
-        run: |
-          link=$(curl -s --location --request GET "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r '.gateway_service')
-
-          if [ "$link" == "${{ env.SERVICE_ID }}" ]; then
-            echo "Service ${SERVICE_ID} has been successfully linked to the API product version ${{ env.API_PRODUCT_VERSION }}."
-          else
-            echo "Failed to link the service ${SERVICE_ID} to the API product version ${{ env.API_PRODUCT_VERSION }}."
+          # Check if the specification file exists
+          if [ ! -f "$SPEC_FILE" ]; then
+            echo "spec.yaml file not found in $SPEC_FILE"
             exit 1
           fi
-
-      - name: Link the OpenAPI Spec to the API Product Version
-        run: |
-          curl -s --request PATCH \
-            --url "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}" \
-            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            --header 'Content-Type: application/json' \
-            --data '{
-              "document": {
-                "path": "spec.yaml",
-                "type": "oas",
-                "value": "'"$(cat kong-config/spec.yaml | yq -o=json | jq -Rs .)"'"
-              }
-            }'
-
-      - name: Validate OAS link
-        run: |
-          doc=$(curl -s --location --request GET "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r '.document.path')
-
-          if [ "$doc" == "spec.yaml" ]; then
-            echo "OAS spec.yaml has been successfully linked to the API product version ${{ env.API_PRODUCT_VERSION }}."
+          
+          # Encode the specification file in base64
+          encoded_spec=$(base64 -w 0 "$SPEC_FILE")
+          echo "Check if specifications are already there or not .."
+          
+          # Fetch the specifications ID
+          response=$(curl --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}/specifications" \
+            --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
+          
+          # Print the API response for debugging
+          echo "Response from API:"
+          echo "$response"
+          
+          # Extract the specifications ID using jq
+          specifications_id=$(echo "$response" | jq -r '.data[] | .id')
+          
+          # Check if the specifications ID exists and update or create accordingly
+          if [ -n "$specifications_id" ]; then
+            echo "Specifications ID: $specifications_id"
+            curl --location --request PATCH "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}/specifications/$specifications_id" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "'"${{ env.SPEC_FILE }}"'",
+                "content": "'"$encoded_spec"'"
+              }'
           else
-            echo "Failed to link OAS spec.yaml to the API product version ${{ env.API_PRODUCT_VERSION }}."
-            exit 1
+            curl --location --request POST "${{ vars.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}/specifications" \
+              --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "name": "'"${{ env.SPEC_FILE }}"'",
+                "content": "'"$encoded_spec"'"
+              }'
           fi
-
+        shell: /usr/bin/bash -e {0}
+        env:
+          SPEC_FILE: spec.yaml
+          API_PRODUCT_NAME: Positions
+          API_PRODUCT_DESCRIPTION: This interface you can find the positions of board and management
+          API_PRODUCT_VERSION: 2.0.2
+          GW_SERVICE_NAME: positions
+          CONTROL_PLANE_NAME: 
+          APPLICATION_AUTH_STRATEGY: 
+          API_PRODUCT_ALREADY_EXISTS: true
+          API_PRODUCT_ID: a9452aae-bc44-484e-92a8-573c18d848aa
+          DEV_PORTAL_ID: b2090b59-1458-44e6-9160-95f5308060ce
+          API_PRODUCT_VERSION_ID: 9fdebd6b-0e22-4169-92fa-0297e2b5a363
+          CONTROL_PLANE_ID: bc1abc57-f22d-4024-a209-58aeb19aa297
+          SERVICE_ID: 6fca19f9-c665-5ba7-9cd4-1a1ac8b7ada5
+          ROLLBACK_SERVICE_LINK_VERSION: 2.0.2
+          ROLLBACK_SERVICE_LINK_VERSION_ID: 9fdebd6b-0e22-4169-92fa-0297e2b5a363
