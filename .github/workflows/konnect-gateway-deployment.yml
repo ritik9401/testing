@@ -119,18 +119,13 @@ jobs:
       - name: Check and set SPEC_FILE environment variable
         run: |
           if [ ! -f kong-config/spec.yaml ]; then
-            echo "spec.yaml file not found in ./kong-config directory"
+            echo "spec.yaml file not found in kong-config directory"
             exit 1
           fi
           SPEC_FILE="kong-config/spec.yaml"
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
-          
-      - name: Fetch environment variables and extract Product details
-        id: set_env_vars
-        run: |
-          config=$(cat ./config.json)
-          echo "Config content: $config"
-          # Extracting product details from spec.yaml using yq
+        
+           # Extracting product details from spec.yaml using yq
           API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
           API_PRODUCT_DESCRIPTION=$(yq e '.info.description' $SPEC_FILE)
           API_PRODUCT_VERSION=$(yq e '.info.version' $SPEC_FILE)
@@ -139,6 +134,12 @@ jobs:
           echo "API_PRODUCT_DESCRIPTION=$API_PRODUCT_DESCRIPTION" >> $GITHUB_ENV
           echo "API_PRODUCT_VERSION=$API_PRODUCT_VERSION" >> $GITHUB_ENV
           echo "GW_SERVICE_NAME=$GW_SERVICE_NAME" >> $GITHUB_ENV
+          
+      - name: Fetch environment variables and extract Product details
+        id: set_env_vars
+        run: |
+          config=$(cat ./config.json)
+          echo "Config content: $config"
           
           # Fetching other configuration details from CONFIG (assuming CONFIG is defined earlier)
           CONTROL_PLANE_NAME=$(echo $config | jq -r .CONTROL_PLANE_NAME)
