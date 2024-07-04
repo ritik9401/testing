@@ -239,7 +239,7 @@ jobs:
       - name: Get Control Plane ID
         run: |
           # control_plane_name="${{ env.CONTROL_PLANE_NAME }}"
-          control_plane_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/" \
+          control_plane_id=$(curl --location "${{ env.ADMIN_API_URL }}/v2/control-planes/" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == "default") | .id')
           echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
@@ -248,7 +248,7 @@ jobs:
         run: |
           control_plane_id="${{ env.CONTROL_PLANE_ID }}"
           gateway_service_name="${{ env.GW_SERVICE_NAME }}"
-          service_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/${control_plane_id}/core-entities/services" \
+          service_id=$(curl --location "${{ env.ADMIN_API_URL }}/v2/control-planes/${control_plane_id}/core-entities/services" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
