@@ -238,12 +238,13 @@ jobs:
       
       - name: Get Control Plane ID
         run: |
-          # control_plane_name="${{ env.CONTROL_PLANE_NAME }}"
+          control_plane_name="${{ env.CONTROL_PLANE_NAME }}"  # Assuming this variable is defined earlier
           control_plane_id=$(curl --location "${{ env.ADMIN_API_URL }}/v2/control-planes/" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == "default") | .id')
+            | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
           echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
           echo "Control Plane ID: $control_plane_id"  # Print the ID for confirmation
+
       - name: Get Service ID
         run: |
           control_plane_id="${{ env.CONTROL_PLANE_ID }}"
