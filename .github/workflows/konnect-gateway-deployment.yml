@@ -1,25 +1,4 @@
-Skip to content
-Navigation Menu
-ritik9401
-/
-testing
 
-Type / to search
-Code
-Issues
-Pull requests
-1
-Actions
-Projects
-Security
-Insights
-Settings
-konnect-gateway-deployment
-Update konnect-gateway-deployment.yml #338
-Jobs
-Run details
-Workflow file for this run
-.github/workflows/konnect-gateway-deployment.yml at efe90ba
 name: konnect-gateway-deployment
 
 on:
