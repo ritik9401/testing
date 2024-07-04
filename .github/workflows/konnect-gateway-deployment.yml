@@ -292,12 +292,13 @@ jobs:
 
       - name: Upload spec on the version
         run: |
-          if [ ! -f kong-config/${{ env.SPEC_FILE }} ]; then
-            echo "spec.yaml file not found in ./kong-config directory"
+          SPEC_FILE="kong-config/${{ env.SPEC_FILE }}"
+          if [ ! -f "$SPEC_FILE" ]; then
+            echo "spec.yaml file not found in $SPEC_FILE"
             exit 1
           fi
-      
-          encoded_spec=$(base64 -w 0 kong-config/${{ env.SPEC_FILE }})
+          
+          encoded_spec=$(base64 -w 0 "$SPEC_FILE")
           echo "Check if specifications are already there or not .."
           
           specifications_id=$(curl --location --request GET "https://eu.api.konghq.com/v2/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications" \
@@ -322,3 +323,20 @@ jobs:
                 "content": "'"$encoded_spec"'"
               }'
           fi
+        shell: /usr/bin/bash -e {0}
+        env:
+          SPEC_FILE: spec.yaml
+          API_PRODUCT_NAME: Positions
+          API_PRODUCT_DESCRIPTION: This interface you can find the positions of board and management
+          API_PRODUCT_VERSION: 2.0.2
+          GW_SERVICE_NAME: positions
+          CONTROL_PLANE_NAME: 
+          APPLICATION_AUTH_STRATEGY: 
+          API_PRODUCT_ALREADY_EXISTS: true
+          API_PRODUCT_ID: a9452aae-bc44-484e-92a8-573c18d848aa
+          DEV_PORTAL_ID: b2090b59-1458-44e6-9160-95f5308060ce
+          API_PRODUCT_VERSION_ID: 9fdebd6b-0e22-4169-92fa-0297e2b5a363
+          CONTROL_PLANE_ID: bc1abc57-f22d-4024-a209-58aeb19aa297
+          SERVICE_ID: 6fca19f9-c665-5ba7-9cd4-1a1ac8b7ada5
+          ROLLBACK_SERVICE_LINK_VERSION: 2.0.2
+          ROLLBACK_SERVICE_LINK_VERSION_ID: 9fdebd6b-0e22-4169-92fa-0297e2b5a363
