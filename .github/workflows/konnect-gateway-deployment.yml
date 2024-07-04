@@ -292,7 +292,7 @@ jobs:
 
       - name: Upload spec on the version
         run: |
-          encoded_spec=$(base64 -w 0 ./kong-config/${{ env.SPEC_FILE }})
+          encoded_spec=$(base64 -w 0 /kong-config/${{ env.SPEC_FILE }})
           echo "Check if specifications is already there or not .."
 
           specifications_id=$(curl --location --request GET "${{ vars.ADMIN_API_URL }}/api-products/$API_PRODUCT_ID/product-versions/$API_PRODUCT_VERSION_ID/specifications" \
