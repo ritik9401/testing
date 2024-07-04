@@ -1,3 +1,25 @@
+Skip to content
+Navigation Menu
+ritik9401
+/
+testing
+
+Type / to search
+Code
+Issues
+Pull requests
+1
+Actions
+Projects
+Security
+Insights
+Settings
+konnect-gateway-deployment
+Update konnect-gateway-deployment.yml #338
+Jobs
+Run details
+Workflow file for this run
+.github/workflows/konnect-gateway-deployment.yml at efe90ba
 name: konnect-gateway-deployment
 
 on:
@@ -116,7 +138,6 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
-
       - name: Check and set SPEC_FILE environment variable
         run: |
           if [ ! -f kong-config/spec.yaml ]; then
@@ -125,13 +146,11 @@ jobs:
           fi
           SPEC_FILE="kong-config/spec.yaml"
           echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
-
       - name: Fetch environment variables and extract Product details
         id: set_env_vars
         run: |
           config=$(cat ./config.json)
           echo "Config content: $config"
-
           # Extracting product details from spec.yaml using yq
           API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
           API_PRODUCT_DESCRIPTION=$(yq e '.info.description' $SPEC_FILE)
@@ -152,7 +171,6 @@ jobs:
           echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
           echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY" >> $GITHUB_ENV
           echo "API_PRODUCT_ALREADY_EXISTS=false" >> $GITHUB_ENV
-
       - name: Debug API_PRODUCT_NAME and other variables
         run: |
           echo "API_PRODUCT_NAME=${{ env.API_PRODUCT_NAME }}"
@@ -238,18 +256,17 @@ jobs:
       
       - name: Get Control Plane ID
         run: |
-          control_plane_name="${{ env.CONTROL_PLANE_NAME }}"  # Assuming this variable is defined earlier
-          control_plane_id=$(curl --location "${{ env.ADMIN_API_URL }}/v2/control-planes/" \
+          # control_plane_name="${{ env.CONTROL_PLANE_NAME }}"
+          control_plane_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
-            | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == $control_plane_name) | .id')
+            | jq -r --arg control_plane_name "$control_plane_name" '.data[] | select(.name == "default") | .id')
           echo "CONTROL_PLANE_ID=$control_plane_id" >> $GITHUB_ENV
           echo "Control Plane ID: $control_plane_id"  # Print the ID for confirmation
-
       - name: Get Service ID
         run: |
           control_plane_id="${{ env.CONTROL_PLANE_ID }}"
           gateway_service_name="${{ env.GW_SERVICE_NAME }}"
-          service_id=$(curl --location "${{ env.ADMIN_API_URL }}/v2/control-planes/${control_plane_id}/core-entities/services" \
+          service_id=$(curl --location "https://eu.api.konghq.com/v2/control-planes/${control_plane_id}/core-entities/services" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}" \
             | jq -r --arg gateway_service_name "$gateway_service_name" '.data[] | select(.name == $gateway_service_name) | .id')
           echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
@@ -337,3 +354,4 @@ jobs:
                 "content": "'"$encoded_spec"'"
               }'
           fi
+Update konnect-gateway-deployment.yml · ritik9401/testing@efe90ba 
