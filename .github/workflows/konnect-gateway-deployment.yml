@@ -57,12 +57,6 @@ jobs:
           echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
           echo "SERVICE_HOST=$SERVICE_HOST" >> $GITHUB_ENV
           
-      - name: Display environment variables for verification
-        run: |
-          echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME"
-          echo "APPLICATION_AUTH_STRATEGY=$APPLICATION_AUTH_STRATEGY"
-          echo "SERVICE_HOST=$SERVICE_HOST"
-          
       # - name: Lint OAS spec using Spectral
       #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
@@ -121,14 +115,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Install yq (v4)
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
           
       - name: Check and set SPEC_FILE environment variable
         run: |
