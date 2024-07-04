@@ -256,6 +256,7 @@ jobs:
             | jq -r '.data[] | select(.gateway_service != null) | .id')
           echo "ROLLBACK_SERVICE_LINK_VERSION=$rollback_api_product_version" >> $GITHUB_ENV
           echo "ROLLBACK_SERVICE_LINK_VERSION_ID=$rollback_api_product_version_id" >> $GITHUB_ENV
+          
       - name: Link service to the product version
         run: |
           echo "Check if current service link product version and the version specified in the OAS specification version is same or not.."
@@ -281,6 +282,7 @@ jobs:
           else
             echo "The product versions match (current - ${{ env.ROLLBACK_SERVICE_LINK_VERSION }} & OAS Spec - ${{ env.API_PRODUCT_VERSION }}); therefore, no changes needed for the service link"
           fi
+          
       - name: Upload spec on the version
         run: |
           # Define the specification file path
@@ -307,7 +309,7 @@ jobs:
           # Extract the specifications ID using jq
           specifications_id=$(echo "$response" | jq -r '.data[] | .id')
           
-          # Check if the specifications ID exists and update or create accordingly
+          # Check if spec file exists and update or create accordingly
           if [ -n "$specifications_id" ]; then
             echo "Specifications ID: $specifications_id"
             curl --location --request PATCH "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}/specifications/$specifications_id" \
