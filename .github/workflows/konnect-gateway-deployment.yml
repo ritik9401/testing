@@ -156,28 +156,34 @@ jobs:
           echo "SERVICE_ID=$service_id" >> $GITHUB_ENV
           echo "Service ID: $service_id"
 
-      - name: Retrieving current service link information to the API product
+      - name: Fetch rollback API product version details
+        id: fetch_rollback_details
         run: |
-          rollback_api_product_version=$(curl -s --location --request GET "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r '.data[] | select(.gateway_service != null) | .name')
-
-          rollback_api_product_version_id=$(curl -s --location --request GET "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r '.data[] | select(.gateway_service != null) | .id')
-
-          rollback_api_product_service=$(curl -s --location --request GET "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions" \
-            --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
-            | jq -r '.data[] | select(.gateway_service != null) | .gateway_service')
-
-          echo "ROLLBACK_API_PRODUCT_VERSION=$rollback_api_product_version" >> $GITHUB_ENV
-          echo "ROLLBACK_API_PRODUCT_VERSION_ID=$rollback_api_product_version_id" >> $GITHUB_ENV
-          echo "ROLLBACK_API_PRODUCT_SERVICE=$rollback_api_product_service" >> $GITHUB_ENV
-
+          # Fetch rollback details from Kong API
+          response=$(curl -s --location --request GET "https://eu.api.konghq.com/v2/api-products/a9452aae-bc44-484e-92a8-573c18d848aa/product-versions" \
+            --header 'Authorization: ***')
+          
+          rollback_api_product_version=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .name')
+          rollback_api_product_version_id=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .id')
+          rollback_api_product_service_id=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .gateway_service.id')
+          rollback_api_product_service_runtime_group_id=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .gateway_service.runtime_group_id')
+          rollback_api_product_service_control_plane_id=$(echo "$response" | jq -r '.data[] | select(.gateway_service != null) | .gateway_service.control_plane_id')
+      
+          # Debug output for extracted values
           echo "rollback_api_product_version: $rollback_api_product_version"
           echo "rollback_api_product_version_id: $rollback_api_product_version_id"
-          echo "rollback_api_product_service: $rollback_api_product_service"
-
+          echo "rollback_api_product_service_id: $rollback_api_product_service_id"
+          echo "rollback_api_product_service_runtime_group_id: $rollback_api_product_service_runtime_group_id"
+          echo "rollback_api_product_service_control_plane_id: $rollback_api_product_service_control_plane_id"
+      
+          # Set environment variables
+          echo "ROLLBACK_API_PRODUCT_VERSION=$rollback_api_product_version" >> $GITHUB_ENV
+          echo "ROLLBACK_API_PRODUCT_VERSION_ID=$rollback_api_product_version_id" >> $GITHUB_ENV
+          echo "ROLLBACK_API_PRODUCT_SERVICE_ID=$rollback_api_product_service_id" >> $GITHUB_ENV
+          echo "ROLLBACK_API_PRODUCT_SERVICE_RUNTIME_GROUP_ID=$rollback_api_product_service_runtime_group_id" >> $GITHUB_ENV
+          echo "ROLLBACK_API_PRODUCT_SERVICE_CONTROL_PLANE_ID=$rollback_api_product_service_control_plane_id" >> $GITHUB_ENV
+      
+        
       - name: Link Gateway Service to the API Product
         run: |
           curl -s --request PATCH \
