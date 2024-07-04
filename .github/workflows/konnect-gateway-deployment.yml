@@ -76,7 +76,7 @@ jobs:
 
       - name: Replacing the Service host from dataplane to backend host.
         run: |
-          deck file patch --selector="$..services[*]" --value="host:'$SERVICE_HOST'" -s kong.yaml -o kong.yaml
+          deck file patch --selector="$..services[*]" --value="host:\"$SERVICE_HOST\"" -s kong.yaml -o kong.yaml
 
       # - name: Add Global plugins
       #   run: deck file add-plugins ./kong-config/global-plugin.yaml -s kong.yaml -o kong.yaml
