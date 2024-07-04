@@ -116,6 +116,15 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.16.1/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
+
+      jobs:
+  publish-customer-api-to-portal:
+    name: Publish OAS to dev portal
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
       - name: Check and set SPEC_FILE environment variable
         run: |
           if [ ! -f kong-config/spec.yaml ]; then
@@ -128,6 +137,9 @@ jobs:
       - name: Fetch environment variables and extract Product details
         id: set_env_vars
         run: |
+          config=$(cat ./config.json)
+          echo "Config content: $config"
+
           # Extracting product details from spec.yaml using yq
           API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
           API_PRODUCT_DESCRIPTION=$(yq e '.info.description' $SPEC_FILE)
@@ -139,9 +151,9 @@ jobs:
           echo "GW_SERVICE_NAME=$GW_SERVICE_NAME" >> $GITHUB_ENV
           
           # Fetching other configuration details from CONFIG (assuming CONFIG is defined earlier)
-          CONTROL_PLANE_NAME=$(echo $CONFIG | jq -r .CONTROL_PLANE_NAME)
-          ADMIN_API_URL=$(echo $CONFIG | jq -r .ADMIN_API_URL)
-          APPLICATION_AUTH_STRATEGY=$(echo $CONFIG | jq -r .APPLICATION_AUTH_STRATEGY)
+          CONTROL_PLANE_NAME=$(echo $config | jq -r .CONTROL_PLANE_NAME)
+          ADMIN_API_URL=$(echo $config | jq -r .ADMIN_API_URL)
+          APPLICATION_AUTH_STRATEGY=$(echo $config | jq -r .APPLICATION_AUTH_STRATEGY)
           
           # Setting environment variables in GitHub Actions environment
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
@@ -155,6 +167,7 @@ jobs:
           echo "API_PRODUCT_DESCRIPTION=${{ env.API_PRODUCT_DESCRIPTION }}"
           echo "API_PRODUCT_VERSION=${{ env.API_PRODUCT_VERSION }}"
           echo "GW_SERVICE_NAME=${{ env.GW_SERVICE_NAME }}"
+          
       - name: Check if the API product already exists or create a new one
         id: check_or_create_api_product
         run: |
