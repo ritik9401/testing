@@ -1,4 +1,3 @@
-
 name: konnect-gateway-deployment
 
 on:
@@ -333,4 +332,3 @@ jobs:
                 "content": "'"$encoded_spec"'"
               }'
           fi
-Update konnect-gateway-deployment.yml · ritik9401/testing@efe90ba 
