@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: 'Positions'
   description: 'This interface you can find the positions of board and management'
-  termsOfService: 'https://openapi.tase.co.il/tase/prod/tsandcs'
+  termsOfService: 'http://13.200.232.160:8000/usage-agreement'
   contact:
     email: apisupport@tase.co.il
   license:
