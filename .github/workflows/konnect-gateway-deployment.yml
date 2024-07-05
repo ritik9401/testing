@@ -317,10 +317,6 @@ jobs:
           response=$(curl --location --request GET "${{ env.ADMIN_API_URL }}/api-products/${{ env.API_PRODUCT_ID }}/product-versions/${{ env.API_PRODUCT_VERSION_ID }}/specifications" \
             --header "Authorization: ${{ secrets.KONNECT_TOKEN }}")
           
-          # Print the API response for debugging
-          echo "Response from API:"
-          echo "$response"
-          
           # Extract the specifications ID using jq
           specifications_id=$(echo "$response" | jq -r '.data[] | .id')
           
