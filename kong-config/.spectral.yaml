@@ -1,57 +1,45 @@
-{
-  "extends": [
-    "spectral:oas",
-    "spectral:asyncapi"
-  ],
-  "rules": {
-    "info-version-format": {
-      "severity": "warn",
-      "recommended": true,
-      "message": "Specs should follow semantic versioning. {{value}} is not a valid version",
-      "given": "$.info.version",
-      "then": {
-        "function": "pattern",
-        "functionOptions": {
-          "match": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
-        }
-      }
-    },
-    "server-url-must-contain-version": {
-      "description": "Global API version must be present in the path",
-      "severity": "warn",
-      "recommended": true,
-      "message": "Unversioned server URL detected: {{value}}",
-      "given": "$.servers[*].url",
-      "then": {
-        "function": "pattern",
-        "functionOptions": {
-          "match": "\\/v[1-9]+\\/"
-        }
-      }
-    },
-    "paths-kebab-case": {
-      "description": "Paths should be kebab-case.",
-      "message": "{{property}} should be kebab-case (lower-case and separated with hyphens)",
-      "severity": "warn",
-      "given": "$.paths[*]~",
-      "then": {
-        "function": "pattern",
-        "functionOptions": {
-          "match": "^(\\/|[a-z0-9-.]+|{[a-zA-Z0-9_|+]})+$"
-        }
-      }
-    },
-    "oas3-valid-schema-example": {
-      "severity": "warn",
-      "recommended": true,
-      "message": "\"example\" property type should be integer",
-      "given": "$.components.schemas.securities.properties.securityId.example",
-      "then": {
-        "function": "type",
-        "functionOptions": {
-          "type": "integer"
-        }
-      }
-    }
-  }
-}
+extends:
+  - spectral:oas
+  - spectral:asyncapi
+
+rules:
+  info-version-format:
+    severity: warn
+    recommended: true
+    message: Specs should follow semantic versioning. {{value}} is not a valid version
+    given: $.info.version
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+
+  server-url-must-contain-version:
+    description: Global API version must be present in the path
+    severity: warn
+    recommended: true
+    message: Unversioned server URL detected: {{value}}
+    given: $.servers[*].url
+    then:
+      function: pattern
+      functionOptions:
+        match: "\\/v[1-9]+\\/"
+
+  paths-kebab-case:
+    description: Paths should be kebab-case.
+    message: "{{property}} should be kebab-case (lower-case and separated with hyphens)"
+    severity: warn
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(\\/|[a-z0-9-.]+|{[a-zA-Z0-9_|+]})+$"
+
+  oas3-valid-schema-example:
+    severity: warn
+    recommended: true
+    message: "\"example\" property type should be integer"
+    given: $.components.schemas.securities.properties.securityId.example
+    then:
+      function: type
+      functionOptions:
+        type: integer
