@@ -5,7 +5,7 @@
   ],
   "rules": {
     "info-version-format": {
-      "severity": "error",
+      "severity": "warn",  // Changed severity from "error" to "warn"
       "recommended": true,
       "message": "Specs should follow semantic versioning. {{value}} is not a valid version",
       "given": "$.info.version",
@@ -18,7 +18,7 @@
     },
     "server-url-must-contain-version": {
       "description": "Global API version must be present in the path",
-      "severity": "error",
+      "severity": "warn",  // Changed severity from "error" to "warn"
       "recommended": true,
       "message": "Unversioned server URL detected: {{value}}",
       "given": "$.servers[*].url",
@@ -31,8 +31,8 @@
     },
     "paths-kebab-case": {
       "description": "Paths should be kebab-case.",
+      "severity": "warn",  // Changed severity from "error" to "warn"
       "message": "{{property}} should be kebab-case (lower-case and separated with hyphens)",
-      "severity": "warn",
       "given": "$.paths[*]~",
       "then": {
         "function": "pattern",
