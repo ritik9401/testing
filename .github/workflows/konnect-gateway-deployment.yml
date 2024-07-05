@@ -58,9 +58,6 @@ jobs:
           echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
           echo "SERVICE_HOST=$SERVICE_HOST" >> $GITHUB_ENV
           echo "KONNECT_ADDRESS=$KONNECT_ADDRESS" >> $GITHUB_ENV
-          
-      # - name: Lint OAS spec using Spectral
-      #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
       - name: Check and set SPEC_FILE environment variable
         run: |
@@ -74,6 +71,9 @@ jobs:
           # Extracting product details from spec.yaml using yq for attaching tag in deployment
           API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
           echo "API_PRODUCT_NAME=$API_PRODUCT_NAME" >> $GITHUB_ENV
+
+      - name: Lint OAS spec using Spectral
+        run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
       - name: Generate new gateway configuration
         run: |
