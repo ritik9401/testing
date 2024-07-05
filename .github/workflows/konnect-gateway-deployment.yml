@@ -72,8 +72,9 @@ jobs:
           API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
           echo "API_PRODUCT_NAME=$API_PRODUCT_NAME" >> $GITHUB_ENV
 
-      - name: Lint OAS spec using Spectral
-        run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+      # - name: Lint OAS spec using Spectral
+      #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
+      # The Linting is commented as of now because the linting ruleset of the client is not provided.
 
       - name: Generate new gateway configuration
         run: |
@@ -115,6 +116,7 @@ jobs:
       # - name: Run API Tests
       #   id: apiTests
       #   run: newman run newman/newman_collection.postman_collection.json
+      #   test cases needs to be written on the basis of plugins and endpoints and there is only CORS enabled globally so cant test it out here 
 
       # - name: Back out changes on failure
       #   if: always() && steps.apiTests.outcome == 'failure'
@@ -122,6 +124,7 @@ jobs:
       #   env:
       #     KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
       #     CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
+      # This step is based on the execution of the "RUN API Tests , hence commented"
 
   publish-customer-api-to-portal:
     name: Publish OAS to dev portal
