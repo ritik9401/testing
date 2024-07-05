@@ -1,10 +1,26 @@
 _format_version: "3.0"
-services:
-  name: 1a8bd8b5-e4a3-45a5-b645-2986fb510f5b
-  path: /
-  plugins: []
-  port: 443
-  protocol: https
-  routes: []
-  tags: []
-upstreams: []
+add-plugins:
+  - plugins:
+      - name: cors
+        enabled: true
+        protocols:
+          - grpc
+          - grpcs
+          - http
+          - https
+        config:
+          credentials: false
+          methods:
+            - GET
+            - HEAD
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+            - OPTIONS
+            - TRACE
+            - CONNECT
+          origins:
+            - '*'
+          preflight_continue: false
+          private_network: false
