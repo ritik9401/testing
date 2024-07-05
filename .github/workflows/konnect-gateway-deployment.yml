@@ -340,7 +340,7 @@ jobs:
               }'
           fi
     
-- name: Get Auth Strategy ID
+      - name: Get Auth Strategy ID
         if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
           auth_strategy_name="${{ vars.AUTH_STRATEGY_NAME }}"
