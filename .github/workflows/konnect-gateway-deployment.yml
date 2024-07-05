@@ -60,6 +60,19 @@ jobs:
       # - name: Lint OAS spec using Spectral
       #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
 
+      - name: Check and set SPEC_FILE environment variable
+        run: |
+          if [ ! -f kong-config/spec.yaml ]; then
+            echo "spec.yaml file not found in kong-config directory"
+            exit 1
+          fi
+          SPEC_FILE="kong-config/spec.yaml"
+          echo "SPEC_FILE=$SPEC_FILE" >> $GITHUB_ENV
+
+          # Extracting product details from spec.yaml using yq for attaching tag in deployment
+          API_PRODUCT_NAME=$(yq e '.info.title' $SPEC_FILE | sed 's/ /-/g')
+          echo "API_PRODUCT_NAME=$API_PRODUCT_NAME" >> $GITHUB_ENV
+
       - name: Generate new gateway configuration
         run: |
           deck file openapi2kong --spec ./kong-config/spec.yaml --output-file kong.yaml
@@ -89,7 +102,7 @@ jobs:
 
       - name: Apply new configuration
         run: |
-          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --select-tag=hello,dev --konnect-addr=https://us.api.konghq.com --tls-skip-verify
+          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --select-tag=${{ env.API_PRODUCT_NAME }},dev --konnect-addr=https://us.api.konghq.com --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
