@@ -84,7 +84,7 @@ jobs:
 
       - name: Adding service,route and Mocking Plugin for Terms and Services Page 
         run: |
-          deck file merge -o kong.yaml kong.yaml agreement.yaml
+          deck file merge -o kong.yaml kong.yaml ./kong-config/agreement.yaml
 
       - name: Add Global plugins
         run: deck file add-plugins ./kong-config/global-plugin.yaml -s kong.yaml -o kong.yaml
