@@ -341,13 +341,12 @@ jobs:
           fi
     
       - name: Get Auth Strategy ID
-        if: env.API_PRODUCT_ALREADY_EXISTS == 'false'
         run: |
-          auth_strategy_name="${{ vars.AUTH_STRATEGY_NAME }}"
-          auth_strategy_id=$(curl --location "${{ vars.ADMIN_API_URL }}/application-auth-strategies" \
+          auth_strategy_name="${{ env.APPLICATION_AUTH_STRATEGY }}"
+          auth_strategy_id=$(curl --location "${{ env.ADMIN_API_URL }}/application-auth-strategies" \
             --header 'Authorization: ${{ secrets.KONNECT_TOKEN }}' \
             | jq -r --arg auth_strategy_name "$auth_strategy_name" '.data[] | select(.name == $auth_strategy_name) | .id')
-          echo "Auth_Strategy_ID=$auth_strategy_id" >> $GITHUB_ENV
+          echo "APPLICATION_AUTH_STRATEGY_ID=$auth_strategy_id" >> $GITHUB_ENV
       
       - name: Enabling Auth Strategy
         run: |
@@ -357,7 +356,7 @@ jobs:
           --data '{
             "application_registration_enabled": true,
             "auth_strategy_ids": [
-              "${{ env.Auth_Strategy_ID }}"
+              "${{ env.APPLICATION_AUTH_STRATEGY_ID }}"
             ],
             "auto_approve_registration": true
           }')
