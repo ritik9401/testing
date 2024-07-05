@@ -41,13 +41,13 @@ jobs:
           sudo cp /tmp/deck /usr/local/bin/
           deck version
           
-      - name: Fetch environment variables and extract Product details
-        id: set_env_vars
+      - name: Read config file
+        id: config
         run: |
           config=$(cat ./config.json)
           echo "Config content: $config"
           
-          # Fetching other configuration details from CONFIG (assuming CONFIG is defined earlier)
+          # Fetching other configuration details from config
           CONTROL_PLANE_NAME=$(echo $config | jq -r .CONTROL_PLANE_NAME)
           ADMIN_API_URL=$(echo $config | jq -r .ADMIN_API_URL)
           SERVICE_HOST=$(echo $config | jq -r .SERVICE_HOST)
@@ -57,7 +57,7 @@ jobs:
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
           echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
           echo "SERVICE_HOST=$SERVICE_HOST" >> $GITHUB_ENV
-          echo "KONNECT_ADDRESS=$KONNECT_ADDRESS >> $GITHUB_ENV
+          echo "KONNECT_ADDRESS=$KONNECT_ADDRESS" >> $GITHUB_ENV
           
       # - name: Lint OAS spec using Spectral
       #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
