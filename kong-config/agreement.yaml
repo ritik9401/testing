@@ -1,141 +1,205 @@
-openapi: 3.0.0
-info:
-  title: TASE Usage Agreement API
-  version: 1.0.0
-paths:
-  /usage-agreement:
-    get:
-      summary: Get TASE Usage Agreement
-      description: Retrieve the usage agreement text.
-      responses:
-        '200':
-          description: OK
-          content:
-            text/html:
-              schema:
-                type: string
-                example: |
-                  <!DOCTYPE html>
-                  <html lang="en">
-                  <head>
-                      <meta charset="UTF-8">
-                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                      <title>Usage Agreement</title>
-                      <style>
-                          body {
-                              font-family: Arial, sans-serif;
-                              margin: 20px;
-                              padding: 0;
-                              box-sizing: border-box;
-                          }
-                          h1 {
-                              font-size: 24px;
-                              text-align: left;
-                              margin-bottom: 20px;
-                              border-bottom: 1px solid #ccc;
-                              padding-bottom: 5px;
-                          }
-                          h2 {
-                              font-size: 20px;
-                          }
-                          blockquote {
-                              border-left: 5px solid #ccc;
-                              margin: 1.5em 10px;
-                              padding: 0.5em 10px;
-                              color: #555;
-                              background: #f9f9f9;
-                          }
-                          p, li {
-                              margin: 10px 0;
-                              line-height: 1.5;
-                          }
-                          ol, ul {
-                              padding-left: 20px;
-                          }
-                          .section-title {
-                              font-weight: bold;
-                          }
-                          .content-wrapper {
-                              max-width: 800px;
-                              margin: auto;
-                              padding: 20px;
-                              border: 1px solid #ccc;
-                              box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
-                          }
-                          @media (max-width: 600px) {
-                              .content-wrapper {
-                                  padding: 10px;
-                              }
-                          }
-                      </style>
-                  </head>
-                  <body>
-                      <div class="content-wrapper">
-                          <h1>USAGE AGREEMENT</h1>
-                          <strong>General</strong>
-                          <p>The Tel-Aviv Stock Exchange Ltd. (hereafter - <strong>“TASE”</strong>) thanks you for choosing to purchase a product usage license, as defined below.</p>
-                          <p>The use of the Product is subject to the terms that are set out in this agreement below and to the <a href="#">terms of use prescribed on TASE’s website</a> (hereafter - <strong>“the Usage Agreement”</strong> or <strong>“this Agreement”</strong>) and is conditional upon your consent to all of its terms.</p>
-                          <p>By marking your approval of the terms of the Usage Agreement (“I Accept”) or by using the Product you are giving your consent to all of the terms of the Usage Agreement.</p>
-                          <p>If you have given your consent as above in the name of any corporation, you are declaring that you have been duly authorized by the corporation to consent in its name to the terms of the Usage Agreement.</p>
-          
-                          <ol>
-                              <li><span class="section-title">“The Product”</span> - Information that is produced via an application programming interface system that supports a direct interface between the IT systems of the client and the data of TASE (API System), as described on the products page (respectively above and below - “the Product” “API System”). For the purposes of this Agreement, “the Product” including any part thereof.</li>
-                              
-                              <li>
-                                  <span class="section-title"></span>
-                                  <blockquote>
-                                  <ol type="a">
-                                      <li>You are purchasing a non-exclusive license for the term of this Agreement to use the Product that you have selected, as prescribed in this Agreement (hereafter - “the License” / “the Usage License”).<br/>The License is to the usage of the product in accordance with the terms of this Agreement. Other than the aforesaid License you are not granted any right in the Product and you are prohibited from making and/or allowing another to make any other use of the Product, whether commercial or otherwise, unless explicitly stated otherwise in this Agreement.</li>
-                                      <li>The License is to the usage of the product in accordance with the terms of this Agreement. Other than the aforesaid License you are not granted any right in the Product and you are prohibited from making and/or allowing another to make any other use of the Product, whether commercial or otherwise.</li>
-                                      <li>You are permitted to process the Product, store it, and as far as permitted in the special conditions for a specific product as they appear in the service site, to distribute it according to the Terms of Use and the conditions stated in this Agreement (If you wish to distribute the Product other than through the API System, you are required to contact TASE in order to establish agreements as to the manner of distribution and the requisite payment, based on TASE’s pricelist).</li>
-                                      <li>You are prohibited from using the Product for the purpose of creating financial instruments, including derivatives.</li>
-                                  </ol>
-                                  </blockquote> 
-                              </li>
-                              <li>
-                                  <p>TASE maintains the right to collect, whether on its own or through others acting on its behalf, various data relating to the use of the Product, including data relating to the use of the Product by you or your clients, for statistical purposes and/or for the improvement or maintenance of the Product, this while maintaining your privacy, subject to the provisions of the law. Without prejudice to the aforesaid, the use of such information will be made in accordance with <a href="https://info.tase.co.il/Eng/about_tase/disclaimer/pages/privacy_policy.aspx" title="TASE’s privacy policy">TASE's privacy policy.</a></p>
-                              </li>
-                              <li>
-                                  <p>The Product is provided “as is” without TASE or any third party making any representation or undertaking in relation thereto, whether explicit or implied, including, inter alia, as regarding its suitability to your needs, to any commercial needs or for any other purpose. TASE does not undertake that the Product will operate continuously, without disruption or delays or in a safe manner, without other disruptions relating to the internet network, to infrastructure causes or to other factors.</p>
-                              </li>
-                              <li>
-                                  <p>The Product should not be construed as a recommendation or an advice to act in one manner or another, including as regarding investment decision-making. The Product is not a substitute for personalized consulting that takes into consideration the specific needs and circumstances of the individual.</p>
-                              </li>
-                              <li>
-                                <span class="section-title"></span>
-                                <blockquote>
-                                <ol type="a">
-                                    <li>The Product Usage License is granted to you subject to the limitation of liability that is set out below and you express your consent to receiving the Usage License under said terms.</li>
-                                    <li>The liability of TASE and/or of anyone acting on its behalf under this Agreement or under any law, including contract law and torts law, shall only apply to a direct damage caused to you as a result of the use of the Product or due to the use and that is a direct result of malice or gross negligence on the part of TASE or anyone acting on its behalf (hereafter - <strong>“Liability Event”</strong>).</li>
-                                    <li>In the occurrence of a “Liability Event”, the following provisions shall apply:</li>
-                                    <blockquote>
-                                    <ol>
-                                        <li>The liability of TASE is to the holder of the Usage License only and not to any third party.<br>To remove any doubt, it is hereby clarified that damage/loss caused to any third party that you would be required to cover or pay in any manner and for any reason shall not be deemed as damage/loss incurred by you and for which TASE is liable for payment or indemnification.</li>
-                                        <li>TASE is not liable for an indirect, incidental, consequential , special or punitive damage/loss, including but without prejudice to the generality of the aforesaid, trading losses, loss of anticipated profits, loss of customers, damage to goodwill or reputation, loss resulting from the discontinuance of operations or increase in your expenditure etc. that you may incur.</li>
-                                        <li>The liability of TASE to a “Liability Event” is limited to the “Liability Amount” as defined below. The “Liability Amount” signifies - the cumulative amount of all actual payments made by you for the Product Usage License in the six months that preceded the Liability Event.</li>
-                                    </ol>
-                                    </blockquote>
-                                    <li>For the avoidance of doubt, it is hereby expressed that if a competent court rules that TASE's liability applies, notwithstanding the foregoing, also in a case that is not a "liability event", the liability shall be limited as provided in sections c.2) and c.3) above.</li>
-                                    <li>You acknowledge that without your consent to the stated in this section above, TASE would not have entered into this Agreement with you.</li>
-                                </ol>
-                                </blockquote> 
-                            </li>
-                            <li>
-                                <p>If the Product is subject to payment as prescribed in the pricelist that is attached to the regulations under Part Five of TASE’s Rules (hereafter - “TASE’s Pricelist”), you undertake to make the payment to TASE as aforesaid and as shall be updated from time to time.
-
-                                    <br>TASE may, at any time, modify the amounts that are charged for the products and the structure of payments, including charging a payment on products for which the usage license was granted free of charge. Notice of such modification shall be delivered by TASE in advance, in the manner that it deems fit, within a time frame that is reasonable under the circumstances, and the modification will come into effect on the date specified in the notice (hereafter - “the Date of Modification”). It is hereby clarified that such modification shall not apply to use of the Product prior to the Date of Modification.
-                                    
-                                    <br>Upon receiving notice of such modification, you shall be entitled to immediately terminate the Agreement. If you continue using the Product after the Date of Modification, this shall be deemed as consent to pay the updated price.</p>
-                            </li>
-                            <li>
-                                <span class="section-title">Limitations of Liability</span>
-                                <p>You acknowledge that you are aware of the limitations of liability stated herein.</p>
-                            </li>                            
-                              <li>
-                                  <span class="section-title">Limitations of Liability</span>
-                                  <p>You acknowledge that you are aware of the limitations of liability stated herein.</p>
-                              </li>
-                          </ol>
-                      </div>
-                  </body>
-                  </html>
+_format_version: "3.0"
+_konnect:
+  control_plane_name: default
+consumers:
+- custom_id: 37ce1494-0a5f-4c75-b4ac-c9be595c7767
+  username: app_24a9fbce-f394-46de-be71-bb1ab89c9b99
+plugins:
+- config:
+    api_specification: "openapi: 3.0.0\ninfo:\n  title: TASE Usage Agreement API\n
+      \ version: 1.0.0\npaths:\n  /usage-agreement:\n    get:\n      summary: Get
+      TASE Usage Agreement\n      description: Retrieve the usage agreement text.\n
+      \     responses:\n        '200':\n          description: OK\n          content:\n
+      \           text/html:\n              schema:\n                type: string\n
+      \               example: |\n                  <!DOCTYPE html>\n                  <html
+      lang=\"en\">\n                  <head>\n                      <meta charset=\"UTF-8\">\n
+      \                     <meta name=\"viewport\" content=\"width=device-width,
+      initial-scale=1.0\">\n                      <title>Usage Agreement</title>\n
+      \                     <style>\n                          body {\n                              font-family:
+      Arial, sans-serif;\n                              margin: 20px;\n                              padding:
+      0;\n                              box-sizing: border-box;\n                          }\n
+      \                         h1 {\n                              font-size: 24px;\n
+      \                             text-align: left;\n                              margin-bottom:
+      20px;\n                              border-bottom: 1px solid #ccc;\n                              padding-bottom:
+      5px;\n                          }\n                          h2 {\n                              font-size:
+      20px;\n                          }\n                          blockquote {\n
+      \                             border-left: 5px solid #ccc;\n                              margin:
+      1.5em 10px;\n                              padding: 0.5em 10px;\n                              color:
+      #555;\n                              background: #f9f9f9;\n                          }\n
+      \                         p, li {\n                              margin: 10px
+      0;\n                              line-height: 1.5;\n                          }\n
+      \                         ol, ul {\n                              padding-left:
+      20px;\n                          }\n                          .section-title
+      {\n                              font-weight: bold;\n                          }\n
+      \                         .content-wrapper {\n                              max-width:
+      800px;\n                              margin: auto;\n                              padding:
+      20px;\n                              border: 1px solid #ccc;\n                              box-shadow:
+      2px 2px 12px rgba(0, 0, 0, 0.1);\n                          }\n                          @media
+      (max-width: 600px) {\n                              .content-wrapper {\n                                  padding:
+      10px;\n                              }\n                          }\n                      </style>\n
+      \                 </head>\n                  <body>\n                      <div
+      class=\"content-wrapper\">\n                          <h1>USAGE AGREEMENT</h1>\n
+      \                         <strong>General</strong>\n                          <p>The
+      Tel-Aviv Stock Exchange Ltd. (hereafter - <strong>“TASE”</strong>) thanks you
+      for choosing to purchase a product usage license, as defined below.</p>\n                          <p>The
+      use of the Product is subject to the terms that are set out in this agreement
+      below and to the <a href=\"#\">terms of use prescribed on TASE’s website</a>
+      (hereafter - <strong>“the Usage Agreement”</strong> or <strong>“this Agreement”</strong>)
+      and is conditional upon your consent to all of its terms.</p>\n                          <p>By
+      marking your approval of the terms of the Usage Agreement (“I Accept”) or by
+      using the Product you are giving your consent to all of the terms of the Usage
+      Agreement.</p>\n                          <p>If you have given your consent
+      as above in the name of any corporation, you are declaring that you have been
+      duly authorized by the corporation to consent in its name to the terms of the
+      Usage Agreement.</p>\n          \n                          <ol>\n                              <li><span
+      class=\"section-title\">“The Product”</span> - Information that is produced
+      via an application programming interface system that supports a direct interface
+      between the IT systems of the client and the data of TASE (API System), as described
+      on the products page (respectively above and below - “the Product” “API System”).
+      For the purposes of this Agreement, “the Product” including any part thereof.</li>\n
+      \                             \n                              <li>\n                                  <span
+      class=\"section-title\"></span>\n                                  <blockquote>\n
+      \                                 <ol type=\"a\">\n                                      <li>You
+      are purchasing a non-exclusive license for the term of this Agreement to use
+      the Product that you have selected, as prescribed in this Agreement (hereafter
+      - “the License” / “the Usage License”).<br/>The License is to the usage of the
+      product in accordance with the terms of this Agreement. Other than the aforesaid
+      License you are not granted any right in the Product and you are prohibited
+      from making and/or allowing another to make any other use of the Product, whether
+      commercial or otherwise, unless explicitly stated otherwise in this Agreement.</li>\n
+      \                                     <li>The License is to the usage of the
+      product in accordance with the terms of this Agreement. Other than the aforesaid
+      License you are not granted any right in the Product and you are prohibited
+      from making and/or allowing another to make any other use of the Product, whether
+      commercial or otherwise.</li>\n                                      <li>You
+      are permitted to process the Product, store it, and as far as permitted in the
+      special conditions for a specific product as they appear in the service site,
+      to distribute it according to the Terms of Use and the conditions stated in
+      this Agreement (If you wish to distribute the Product other than through the
+      API System, you are required to contact TASE in order to establish agreements
+      as to the manner of distribution and the requisite payment, based on TASE’s
+      pricelist).</li>\n                                      <li>You are prohibited
+      from using the Product for the purpose of creating financial instruments, including
+      derivatives.</li>\n                                  </ol>\n                                  </blockquote>
+      \n                              </li>\n                              <li>\n
+      \                                 <p>TASE maintains the right to collect, whether
+      on its own or through others acting on its behalf, various data relating to
+      the use of the Product, including data relating to the use of the Product by
+      you or your clients, for statistical purposes and/or for the improvement or
+      maintenance of the Product, this while maintaining your privacy, subject to
+      the provisions of the law. Without prejudice to the aforesaid, the use of such
+      information will be made in accordance with <a href=\"https://info.tase.co.il/Eng/about_tase/disclaimer/pages/privacy_policy.aspx\"
+      title=\"TASE’s privacy policy\">TASE's privacy policy.</a></p>\n                              </li>\n
+      \                             <li>\n                                  <p>The
+      Product is provided “as is” without TASE or any third party making any representation
+      or undertaking in relation thereto, whether explicit or implied, including,
+      inter alia, as regarding its suitability to your needs, to any commercial needs
+      or for any other purpose. TASE does not undertake that the Product will operate
+      continuously, without disruption or delays or in a safe manner, without other
+      disruptions relating to the internet network, to infrastructure causes or to
+      other factors.</p>\n                              </li>\n                              <li>\n
+      \                                 <p>The Product should not be construed as
+      a recommendation or an advice to act in one manner or another, including as
+      regarding investment decision-making. The Product is not a substitute for personalized
+      consulting that takes into consideration the specific needs and circumstances
+      of the individual.</p>\n                              </li>\n                              <li>\n
+      \                               <span class=\"section-title\"></span>\n                                <blockquote>\n
+      \                               <ol type=\"a\">\n                                    <li>The
+      Product Usage License is granted to you subject to the limitation of liability
+      that is set out below and you express your consent to receiving the Usage License
+      under said terms.</li>\n                                    <li>The liability
+      of TASE and/or of anyone acting on its behalf under this Agreement or under
+      any law, including contract law and torts law, shall only apply to a direct
+      damage caused to you as a result of the use of the Product or due to the use
+      and that is a direct result of malice or gross negligence on the part of TASE
+      or anyone acting on its behalf (hereafter - <strong>“Liability Event”</strong>).</li>\n
+      \                                   <li>In the occurrence of a “Liability Event”,
+      the following provisions shall apply:</li>\n                                    <blockquote>\n
+      \                                   <ol>\n                                        <li>The
+      liability of TASE is to the holder of the Usage License only and not to any
+      third party.<br>To remove any doubt, it is hereby clarified that damage/loss
+      caused to any third party that you would be required to cover or pay in any
+      manner and for any reason shall not be deemed as damage/loss incurred by you
+      and for which TASE is liable for payment or indemnification.</li>\n                                        <li>TASE
+      is not liable for an indirect, incidental, consequential , special or punitive
+      damage/loss, including but without prejudice to the generality of the aforesaid,
+      trading losses, loss of anticipated profits, loss of customers, damage to goodwill
+      or reputation, loss resulting from the discontinuance of operations or increase
+      in your expenditure etc. that you may incur.</li>\n                                        <li>The
+      liability of TASE to a “Liability Event” is limited to the “Liability Amount”
+      as defined below. The “Liability Amount” signifies - the cumulative amount of
+      all actual payments made by you for the Product Usage License in the six months
+      that preceded the Liability Event.</li>\n                                    </ol>\n
+      \                                   </blockquote>\n                                    <li>For
+      the avoidance of doubt, it is hereby expressed that if a competent court rules
+      that TASE's liability applies, notwithstanding the foregoing, also in a case
+      that is not a \"liability event\", the liability shall be limited as provided
+      in sections c.2) and c.3) above.</li>\n                                    <li>You
+      acknowledge that without your consent to the stated in this section above, TASE
+      would not have entered into this Agreement with you.</li>\n                                </ol>\n
+      \                               </blockquote> \n                            </li>\n
+      \                           <li>\n                                <p>If the
+      Product is subject to payment as prescribed in the pricelist that is attached
+      to the regulations under Part Five of TASE’s Rules (hereafter - “TASE’s Pricelist”),
+      you undertake to make the payment to TASE as aforesaid and as shall be updated
+      from time to time.\n\n                                    <br>TASE may, at any
+      time, modify the amounts that are charged for the products and the structure
+      of payments, including charging a payment on products for which the usage license
+      was granted free of charge. Notice of such modification shall be delivered by
+      TASE in advance, in the manner that it deems fit, within a time frame that is
+      reasonable under the circumstances, and the modification will come into effect
+      on the date specified in the notice (hereafter - “the Date of Modification”).
+      It is hereby clarified that such modification shall not apply to use of the
+      Product prior to the Date of Modification.\n                                    \n
+      \                                   <br>Upon receiving notice of such modification,
+      you shall be entitled to immediately terminate the Agreement. If you continue
+      using the Product after the Date of Modification, this shall be deemed as consent
+      to pay the updated price.</p>\n                            </li>\n                            <li>\n
+      \                               <span class=\"section-title\">Limitations of
+      Liability</span>\n                                <p>You acknowledge that you
+      are aware of the limitations of liability stated herein.</p>\n                            </li>
+      \                           \n                              <li>\n                                  <span
+      class=\"section-title\">Limitations of Liability</span>\n                                  <p>You
+      acknowledge that you are aware of the limitations of liability stated herein.</p>\n
+      \                             </li>\n                          </ol>\n                      </div>\n
+      \                 </body>\n                  </html>\n"
+    api_specification_filename: null
+    custom_base_path: null
+    include_base_path: false
+    included_status_codes: null
+    max_delay_time: 1
+    min_delay_time: 0.001
+    random_delay: false
+    random_examples: false
+    random_status_code: false
+  enabled: true
+  name: mocking
+  protocols:
+  - grpc
+  - grpcs
+  - http
+  - https
+services:
+- connect_timeout: 60000
+  enabled: true
+  host: terms-and-services
+  name: terms-and-services-service
+  port: 80
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    name: terms-and-services-route
+    path_handling: v0
+    paths:
+    - /usage-agreement
+    preserve_host: false
+    protocols:
+    - http
+    - https
+    regex_priority: 0
+    request_buffering: true
+    response_buffering: true
+    strip_path: true
+  write_timeout: 60000
