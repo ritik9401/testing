@@ -8,7 +8,7 @@ info:
   license:
     name: Tase API 1.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-  version: 2.0.2
+  version: 2.0.3
 servers:
   - url: 'https://65.2.164.57:8443'
     description: MAYA API Swagger Test
