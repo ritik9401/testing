@@ -51,11 +51,13 @@ jobs:
           CONTROL_PLANE_NAME=$(echo $config | jq -r .CONTROL_PLANE_NAME)
           ADMIN_API_URL=$(echo $config | jq -r .ADMIN_API_URL)
           SERVICE_HOST=$(echo $config | jq -r .SERVICE_HOST)
+          KONNECT_ADDRESS=$(echo $config | jq -r .KONNECT_ADDRESS)
           
           # Setting environment variables in GitHub Actions environment
           echo "CONTROL_PLANE_NAME=$CONTROL_PLANE_NAME" >> $GITHUB_ENV
           echo "ADMIN_API_URL=$ADMIN_API_URL" >> $GITHUB_ENV
           echo "SERVICE_HOST=$SERVICE_HOST" >> $GITHUB_ENV
+          echo "KONNECT_ADDRESS=$KONNECT_ADDRESS >> $GITHUB_ENV
           
       # - name: Lint OAS spec using Spectral
       #   run: spectral lint ./kong-config/spec.yaml --ruleset ./kong-config/.spectral.yaml
@@ -95,14 +97,14 @@ jobs:
 
       - name: Backup existing configuration
         run: |
-          deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --konnect-addr=https://us.api.konghq.com --tls-skip-verify > kong-backup.yaml
+          deck gateway dump --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --konnect-addr ${{ env.KONNECT_ADDRESS }} --tls-skip-verify > kong-backup.yaml
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
 
       - name: Apply new configuration
         run: |
-          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --select-tag=${{ env.API_PRODUCT_NAME }},dev --konnect-addr=https://us.api.konghq.com --tls-skip-verify
+          deck gateway sync kong.yaml --konnect-token ${{ secrets.KONNECT_TOKEN }} --konnect-control-plane-name ${{ env.CONTROL_PLANE_NAME }} --select-tag=${{ env.API_PRODUCT_NAME }},dev --konnect-addr ${{ env.KONNECT_ADDRESS }} --tls-skip-verify
         env:
           KONNECT_TOKEN: ${{ secrets.KONNECT_TOKEN }}
           CONTROL_PLANE_NAME: ${{ env.CONTROL_PLANE_NAME }}
