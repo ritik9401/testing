@@ -49,6 +49,39 @@ paths:
                 $ref: '#/components/schemas/BoardAndManagementPositionsResponse'
         '400':
           description: Invalid status value
+  '/position_2':
+    get:
+      tags:
+        - positions
+      summary: 'This interface you can find the positions of board and management'
+      description: 'This interface you can find the positions of board and management'
+      operationId: getBoardAndManagementPositions
+      parameters:
+        - in: header
+          name: accept-language
+          schema:
+            type: string
+            enum: [en-US, he-IL]
+            default: he-IL
+          required: true
+        - in: query
+          name: issuerId
+          required: false
+          description: Enter issuer number
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 99999999
+            example: 76
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoardAndManagementPositionsResponse'
+        '400':
+          description: Invalid status value
 components:
   schemas:
     securities:
