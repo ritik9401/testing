@@ -55,7 +55,7 @@ paths:
         - positions
       summary: 'This interface you can find the positions of board and management'
       description: 'This interface you can find the positions of board and management'
-      operationId: getBoardAndManagementPositions
+      operationId: getBoardAndManagementPositions2
       parameters:
         - in: header
           name: accept-language
